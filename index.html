@@ -25,17 +25,17 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans select-none">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans select-none overflow-x-hidden w-full max-w-[100vw]">
 
-  <!-- ① メインヘッダー -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6">
-      <div class="flex items-center justify-between h-14 sm:h-16 gap-2">
+  <!-- ① メインヘッダー（スマホ特化：はみ出し防止＆コンパクト化） -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm w-full">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6">
+      <div class="flex items-center justify-between h-14 sm:h-16 gap-1 sm:gap-2">
         
         <!-- ロゴ -->
-        <div class="flex items-center gap-2.5 cursor-pointer flex-shrink-0" onclick="switchNavTab('catalog')">
-          <div class="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center flex-shrink-0 p-1">
-            <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div class="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer flex-shrink-0" onclick="switchNavTab('catalog')">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center flex-shrink-0 p-1">
+            <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="dpadBody" x1="16" y1="3" x2="16" y2="29" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stop-color="#5f636a"/>
@@ -51,65 +51,54 @@
                   <stop offset="100%" stop-color="#5a5e66"/>
                 </linearGradient>
               </defs>
-              <!-- 外枠（ダークなエッジ） -->
-              <path d="M11.5 3.5h9a2.5 2.5 0 0 1 2.5 2.5V10h4a2.5 2.5 0 0 1 2.5 2.5v7a2.5 2.5 0 0 1-2.5 2.5h-4v4a2.5 2.5 0 0 1-2.5 2.5h-9a2.5 2.5 0 0 1-2.5-2.5v-4H5a2.5 2.5 0 0 1-2.5-2.5v-7A2.5 2.5 0 0 1 5 10h4V6a2.5 2.5 0 0 1 2.5-2.5z"
-                fill="#25272b"/>
-              <!-- メインボディ -->
-              <path d="M12 4.5h8a1.5 1.5 0 0 1 1.5 1.5V11h5a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-5v5a1.5 1.5 0 0 1-1.5 1.5h-8a1.5 1.5 0 0 1-1.5-1.5v-5H5a1.5 1.5 0 0 1-1.5-1.5v-6A1.5 1.5 0 0 1 5 11h5V6a1.5 1.5 0 0 1 1.5-1.5z"
-                fill="url(#dpadBody)"/>
-              <!-- 内側ハイライトエッジ -->
-              <path d="M12.5 5.5h7a0.8 0.8 0 0 1 .8.8V11.5h5.4a0.8 0.8 0 0 1 .8.8v4.4h-6.2v6.2h-4.4V17H4.5v-4.4a0.8 0.8 0 0 1 .8-.8h5.4V6.3a0.8 0.8 0 0 1 .8-.8z"
-                fill="none" stroke="url(#dpadBevel)" stroke-width="0.7" opacity="0.6"/>
-              <!-- 中央の凹み（ディンプル） -->
+              <path d="M11.5 3.5h9a2.5 2.5 0 0 1 2.5 2.5V10h4a2.5 2.5 0 0 1 2.5 2.5v7a2.5 2.5 0 0 1-2.5 2.5h-4v4a2.5 2.5 0 0 1-2.5 2.5h-9a2.5 2.5 0 0 1-2.5-2.5v-4H5a2.5 2.5 0 0 1-2.5-2.5v-7A2.5 2.5 0 0 1 5 10h4V6a2.5 2.5 0 0 1 2.5-2.5z" fill="#25272b"/>
+              <path d="M12 4.5h8a1.5 1.5 0 0 1 1.5 1.5V11h5a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-5v5a1.5 1.5 0 0 1-1.5 1.5h-8a1.5 1.5 0 0 1-1.5-1.5v-5H5a1.5 1.5 0 0 1-1.5-1.5v-6A1.5 1.5 0 0 1 5 11h5V6a1.5 1.5 0 0 1 1.5-1.5z" fill="url(#dpadBody)"/>
+              <path d="M12.5 5.5h7a0.8 0.8 0 0 1 .8.8V11.5h5.4a0.8 0.8 0 0 1 .8.8v4.4h-6.2v6.2h-4.4V17H4.5v-4.4a0.8 0.8 0 0 1 .8-.8h5.4V6.3a0.8 0.8 0 0 1 .8-.8z" fill="none" stroke="url(#dpadBevel)" stroke-width="0.7" opacity="0.6"/>
               <circle cx="16" cy="16" r="3.2" fill="url(#dimpleGrad)"/>
               <circle cx="16" cy="16" r="3.2" fill="none" stroke="#25272b" stroke-width="0.6"/>
               <circle cx="16" cy="16" r="2.3" fill="#464950"/>
             </svg>
           </div>
           <div>
-            <h1 class="font-black tracking-tight text-slate-900 text-sm sm:text-base leading-tight">レトロゲーム コレクション</h1>
-            <p class="text-[10px] text-slate-500 font-medium hidden sm:block">レトロゲームを集めよう！</p>
+            <h1 class="font-black tracking-tight text-slate-900 text-xs sm:text-base leading-tight truncate max-w-[100px] sm:max-w-none">レトロゲーム</h1>
+            <p class="text-[9px] text-slate-400 font-medium hidden sm:block">レトロゲーム コレクション</p>
           </div>
         </div>
 
-        <!-- ナビゲーションタブ（ゲーム一覧・進捗・つぶやき・カレンダー・ニュース） -->
-        <nav class="flex items-center gap-1">
-          <button type="button" id="tabNavCatalog" onclick="switchNavTab('catalog')" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-slate-900 text-white shadow-sm transition">
+        <!-- ナビゲーションタブ（スマホ時はアイコン中心でスマート化） -->
+        <nav class="flex items-center gap-0.5 sm:gap-1">
+          <button type="button" id="tabNavCatalog" onclick="switchNavTab('catalog')" title="ゲーム一覧" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
             <span class="hidden md:inline">ゲーム一覧</span>
           </button>
-          <button type="button" id="tabNavProgress" onclick="openProgressModal()" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+          <button type="button" id="tabNavProgress" onclick="openProgressModal()" title="達成率" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             <span class="hidden md:inline">達成率</span>
           </button>
-          <button type="button" id="tabNavPosts" onclick="switchNavTab('posts')" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+          <button type="button" id="tabNavPosts" onclick="switchNavTab('posts')" title="つぶやき" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
             <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
             <span class="hidden lg:inline">つぶやき</span>
           </button>
-          <button type="button" id="tabNavCalendar" onclick="switchNavTab('calendar')" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+          <button type="button" id="tabNavCalendar" onclick="switchNavTab('calendar')" title="記念日" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
             <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             <span class="hidden lg:inline">記念日</span>
           </button>
-          <button type="button" id="tabNavNews" onclick="switchNavTab('news')" class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+          <button type="button" id="tabNavNews" onclick="switchNavTab('news')" title="ニュース" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
             <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
             <span class="hidden lg:inline">ニュース</span>
           </button>
         </nav>
 
-        <!-- アクションボタン（プリセット反映・シート同期・CSV・エクスポート） -->
-        <div class="flex items-center gap-1 sm:gap-2">
-          <button type="button" onclick="applyPresetTitles(false)" title="所持リスト約200本を反映" class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 text-xs font-bold rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 shadow-sm transition">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            <span class="hidden xl:inline">プリセット反映</span>
-          </button>
-          <button type="button" id="btnSyncMaster" onclick="syncMasterCsv(false)" title="スプレッドシートマスターと同期" class="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition">
+        <!-- アクションボタン（シート同期・CSV・エクスポート） -->
+        <div class="flex items-center gap-1 flex-shrink-0">
+          <button type="button" id="btnSyncMaster" onclick="syncMasterCsv(false)" title="スプレッドシートマスターと同期" class="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition flex items-center gap-1">
             <svg id="syncIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            <span class="hidden sm:inline">シート同期</span>
+            <span class="hidden md:inline">シート同期</span>
           </button>
-          <button type="button" onclick="openCsvImportModal()" title="所持CSVファイル取込" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition">
+          <button type="button" onclick="openCsvImportModal()" title="所持CSVファイル取込" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           </button>
-          <button type="button" onclick="exportDataBackup()" title="データJSONバックアップ" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition">
+          <button type="button" onclick="exportDataBackup()" title="データJSONバックアップ" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           </button>
         </div>
@@ -118,39 +107,37 @@
     </div>
   </header>
 
-  <!-- ② サマリーストリップ（所持・完品・ほしい・プレイ中・収集率） -->
-  <section class="bg-slate-900 text-slate-100 border-b border-slate-800 py-2.5 px-4 shadow-inner">
-    <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-y-2 gap-x-4 text-xs">
+  <!-- ② サマリーストリップ（スマホでも横はみ出ししないレスポンシブ配置） -->
+  <section class="bg-slate-900 text-slate-100 border-b border-slate-800 py-2 px-3 sm:px-6 shadow-inner w-full">
+    <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-y-1.5 gap-x-2 text-[11px] sm:text-xs">
       
       <!-- 同期ステータス -->
-      <div class="flex items-center gap-2">
-        <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-        <span id="syncStatusText" class="text-slate-300 font-medium">マスター読み込み中...</span>
+      <div class="flex items-center gap-1.5 min-w-0">
+        <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
+        <span id="syncStatusText" class="text-slate-300 font-medium truncate max-w-[130px] sm:max-w-none">マスター読込中...</span>
       </div>
 
       <!-- 収集指標サマリー -->
-      <div class="flex items-center gap-3 sm:gap-5 flex-wrap">
-        <div class="flex items-center gap-1.5">
-          <span class="text-slate-400 text-[11px]">所持:</span>
-          <span class="font-black text-emerald-400 text-sm" id="sumOwnedCount">0</span>
-          <span class="text-[10px] text-slate-400">本</span>
+      <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+        <div class="flex items-center gap-1">
+          <span class="text-slate-400 text-[10px]">所持:</span>
+          <span class="font-black text-emerald-400 text-xs sm:text-sm" id="sumOwnedCount">0</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="text-slate-400 text-[11px]">👑 完品:</span>
-          <span class="font-black text-amber-300 text-sm" id="sumCompleteCount">0</span>
-          <span class="text-[10px] text-slate-400">本</span>
+        <div class="flex items-center gap-1">
+          <span class="text-slate-400 text-[10px]">👑 完品:</span>
+          <span class="font-black text-amber-300 text-xs sm:text-sm" id="sumCompleteCount">0</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="text-slate-400 text-[11px]">ほしい:</span>
-          <span class="font-bold text-sky-300 text-xs" id="sumWantedCount">0</span>
+        <div class="flex items-center gap-1">
+          <span class="text-slate-400 text-[10px]">ほしい:</span>
+          <span class="font-bold text-sky-300 text-[11px] sm:text-xs" id="sumWantedCount">0</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="text-slate-400 text-[11px]">プレイ中:</span>
-          <span class="font-bold text-purple-300 text-xs" id="sumPlayingCount">0</span>
+        <div class="flex items-center gap-1">
+          <span class="text-slate-400 text-[10px]">プレイ中:</span>
+          <span class="font-bold text-purple-300 text-[11px] sm:text-xs" id="sumPlayingCount">0</span>
         </div>
-        <div class="flex items-center gap-1.5 border-l border-slate-700 pl-3">
-          <span class="text-slate-400 text-[11px]">収集率:</span>
-          <span class="font-black text-white text-sm" id="sumCollectRate">0.0%</span>
+        <div class="flex items-center gap-1 border-l border-slate-700 pl-2">
+          <span class="text-slate-400 text-[10px]">収集率:</span>
+          <span class="font-black text-white text-xs sm:text-sm" id="sumCollectRate">0.0%</span>
         </div>
       </div>
 
@@ -158,146 +145,160 @@
   </section>
 
   <!-- ③ メインコンテナ -->
-  <main class="max-w-7xl mx-auto px-3 sm:px-6 py-4 flex-1 w-full space-y-4">
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex-1 w-full space-y-3">
     
-    <!-- カタログセクション（1カラム一覧 ＋ 折りたたみ式サイドフィルター） -->
-    <div id="sectionCatalog" class="flex flex-col lg:flex-row items-start gap-4">
+    <!-- カタログセクション（最上部検索バー ＆ 折りたたみ式フィルター） -->
+    <div id="sectionCatalog" class="w-full space-y-3">
       
-      <!-- サイドフィルターパネル（スマホ時はドロワー/アコーディオン） -->
-      <aside id="filterSidebar" class="w-full lg:w-64 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4 flex-shrink-0">
+      <!-- 【最優先】最上部 検索ツールバー（画面を開いて即座にタイトル検索・登録可能） -->
+      <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+        
+        <!-- 検索インプット（事前インデックス対応） -->
+        <div class="relative flex-1">
+          <input type="text" id="searchInput" oninput="debouncedApplyFilters()" placeholder="タイトル、メーカー、発売年ですぐに検索・登録..." class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <button type="button" onclick="clearSearchInput()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden" id="clearSearchBtn">✕</button>
+        </div>
+
+        <!-- コントロールバー（フィルター開閉ボタン・ソート・表示切替） -->
+        <div class="flex items-center gap-2 justify-between sm:justify-end flex-wrap">
+          
+          <!-- フィルター開閉トグルボタン（スマホ時はタップで展開、PCでも省スペース化可能） -->
+          <button type="button" id="btnToggleFilterPanel" onclick="toggleFilterDrawer()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition border border-slate-200">
+            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            <span>絞り込み</span>
+            <span id="filterActiveBadge" class="w-2 h-2 rounded-full bg-emerald-500 hidden"></span>
+            <span id="filterArrowIcon" class="text-[10px] text-slate-400 transition-transform">▼</span>
+          </button>
+
+          <!-- ソートセレクター -->
+          <select id="sortSelect" onchange="applyFilters()" class="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="release_asc">発売日 (古い順)</option>
+            <option value="release_desc">発売日 (新しい順)</option>
+            <option value="title_asc">五十音順</option>
+            <option value="rank_desc">美品順</option>
+            <option value="price_desc">購入額順</option>
+          </select>
+
+          <!-- 表示形式切り替えトグル（グリッド / リスト） -->
+          <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+            <button type="button" id="btnViewGrid" onclick="setViewMode('grid')" title="ジャケットグリッド表示" class="p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            </button>
+            <button type="button" id="btnViewList" onclick="setViewMode('list')" title="詳細リスト表示" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 絞り込みフィルターパネル（初期状態はスッキリ折りたたみ。タップでスムーズ展開） -->
+      <aside id="filterSidebar" class="hidden bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4 w-full transition-all duration-200">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-            絞り込みフィルター
+            絞り込み条件
           </h3>
-          <button type="button" onclick="resetAllFilters()" class="text-[11px] text-slate-400 hover:text-emerald-600 font-medium">リセット</button>
-        </div>
-
-        <!-- 収集ステータスフィルター（所持・ほしい・プレイ中・未所持） -->
-        <div class="space-y-1.5">
-          <div class="text-[11px] font-bold text-slate-400">収集ステータス</div>
-          <div class="grid grid-cols-2 gap-1 text-xs">
-            <button type="button" onclick="setCollectionStatusFilter('owned')" id="btnStatFilter_owned" class="py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between">
-              <span>所持のみ</span>
-              <span id="badgeStat_owned" class="text-[10px] opacity-80">0</span>
-            </button>
-            <button type="button" onclick="setCollectionStatusFilter('all')" id="btnStatFilter_all" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
-              <span>全タイトル</span>
-              <span id="badgeStat_all" class="text-[10px] text-slate-400">0</span>
-            </button>
-            <button type="button" onclick="setCollectionStatusFilter('wanted')" id="btnStatFilter_wanted" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
-              <span>ほしい</span>
-              <span id="badgeStat_wanted" class="text-[10px] text-slate-400">0</span>
-            </button>
-            <button type="button" onclick="setCollectionStatusFilter('playing')" id="btnStatFilter_playing" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
-              <span>プレイ中</span>
-              <span id="badgeStat_playing" class="text-[10px] text-slate-400">0</span>
-            </button>
-            <button type="button" onclick="setCollectionStatusFilter('unowned')" id="btnStatFilter_unowned" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left col-span-2 flex items-center justify-between">
-              <span>未所持タイトルのみ</span>
-              <span id="badgeStat_unowned" class="text-[10px] text-slate-400">0</span>
-            </button>
+          <div class="flex items-center gap-3">
+            <button type="button" onclick="resetAllFilters()" class="text-xs text-slate-400 hover:text-emerald-600 font-bold">リセット</button>
+            <button type="button" onclick="toggleFilterDrawer()" class="text-xs text-slate-400 hover:text-slate-600 font-bold sm:hidden">閉じる ✕</button>
           </div>
         </div>
 
-        <!-- 状態・メンテナンス特化トグル -->
-        <div class="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
-          <div class="text-[11px] font-bold text-slate-400">こだわり条件</div>
-          <label class="flex items-center gap-2 cursor-pointer text-slate-700 hover:text-emerald-700">
-            <input type="checkbox" id="filterCheckCompleteOnly" onchange="applyFilters()" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
-            <span class="font-bold flex items-center gap-1">👑 箱説完品のみ</span>
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer text-slate-700 hover:text-emerald-700">
-            <input type="checkbox" id="filterCheckBatteryDone" onchange="applyFilters()" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
-            <span>🔋 電池交換済のみ</span>
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer text-slate-700 hover:text-emerald-700">
-            <input type="checkbox" id="filterCheckCleanDone" onchange="applyFilters()" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
-            <span>🧽 端子清掃済のみ</span>
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer text-slate-700 hover:text-emerald-700">
-            <input type="checkbox" id="filterCheckTestedDone" onchange="applyFilters()" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
-            <span>🕹️ 動作確認済のみ</span>
-          </label>
-        </div>
-
-        <!-- 状態ランク絞り込み -->
-        <div class="space-y-1.5 pt-2 border-t border-slate-100">
-          <div class="text-[11px] font-bold text-slate-400">状態ランク</div>
-          <div class="grid grid-cols-6 gap-1 text-[11px] text-center font-bold">
-            <button type="button" onclick="setRankFilter('ALL')" id="btnRank_ALL" class="py-1 rounded bg-slate-800 text-white">全</button>
-            <button type="button" onclick="setRankFilter('S')" id="btnRank_S" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">S</button>
-            <button type="button" onclick="setRankFilter('A')" id="btnRank_A" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">A</button>
-            <button type="button" onclick="setRankFilter('B')" id="btnRank_B" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">B</button>
-            <button type="button" onclick="setRankFilter('C')" id="btnRank_C" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">C</button>
-            <button type="button" onclick="setRankFilter('J')" id="btnRank_J" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">J</button>
-          </div>
-        </div>
-
-        <!-- ハード別クイック選択（自動折り返し表示） -->
-        <div class="space-y-1.5 pt-2 border-t border-slate-100">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-slate-400">対応ハード</span>
-            <span id="activeHardLabel" class="text-[11px] font-bold text-emerald-600">すべて</span>
-          </div>
-          <div id="sidebarPlatformPills" class="flex flex-wrap gap-1 max-h-48 overflow-y-auto pr-1">
-            <!-- JSで動的生成 -->
-          </div>
-        </div>
-      </aside>
-
-      <!-- メイングリッド表示エリア -->
-      <div class="flex-1 w-full space-y-3 min-w-0">
-        
-        <!-- ツールバー（検索・ソート・表示切替） -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-          
-          <!-- 検索インプット（事前インデックス対応） -->
-          <div class="relative flex-1">
-            <input type="text" id="searchInput" oninput="debouncedApplyFilters()" placeholder="タイトル、メーカー名、発売年で爆速検索..." class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
-            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <button type="button" onclick="clearSearchInput()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden" id="clearSearchBtn">✕</button>
-          </div>
-
-          <!-- ソートセレクター＆表示切替ボタン -->
-          <div class="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
-            <select id="sortSelect" onchange="applyFilters()" class="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <option value="release_asc">発売日 (古い順)</option>
-              <option value="release_desc">発売日 (新しい順)</option>
-              <option value="title_asc">タイトル五十音順</option>
-              <option value="rank_desc">状態ランク順 (美品順)</option>
-              <option value="price_desc">購入額 (高い順)</option>
-            </select>
-
-            <!-- 表示形式切り替えトグル（グリッド / リスト） -->
-            <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
-              <button type="button" id="btnViewGrid" onclick="setViewMode('grid')" title="ジャケットグリッド表示" class="p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- 収集ステータスフィルター -->
+          <div class="space-y-1.5">
+            <div class="text-[11px] font-bold text-slate-400">収集ステータス</div>
+            <div class="grid grid-cols-2 gap-1.5 text-xs">
+              <button type="button" onclick="setCollectionStatusFilter('all')" id="btnStatFilter_all" class="py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between">
+                <span>全タイトル</span>
+                <span id="badgeStat_all" class="text-[10px] opacity-80">0</span>
               </button>
-              <button type="button" id="btnViewList" onclick="setViewMode('list')" title="詳細リスト表示" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <button type="button" onclick="setCollectionStatusFilter('owned')" id="btnStatFilter_owned" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                <span>所持のみ</span>
+                <span id="badgeStat_owned" class="text-[10px] text-slate-400">0</span>
+              </button>
+              <button type="button" onclick="setCollectionStatusFilter('wanted')" id="btnStatFilter_wanted" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                <span>ほしい</span>
+                <span id="badgeStat_wanted" class="text-[10px] text-slate-400">0</span>
+              </button>
+              <button type="button" onclick="setCollectionStatusFilter('playing')" id="btnStatFilter_playing" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                <span>プレイ中</span>
+                <span id="badgeStat_playing" class="text-[10px] text-slate-400">0</span>
+              </button>
+              <button type="button" onclick="setCollectionStatusFilter('unowned')" id="btnStatFilter_unowned" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left col-span-2 flex items-center justify-between">
+                <span>未所持タイトルのみ</span>
+                <span id="badgeStat_unowned" class="text-[10px] text-slate-400">0</span>
               </button>
             </div>
           </div>
 
-        </div>
+          <!-- こだわり条件 ＆ 状態ランク -->
+          <div class="space-y-3">
+            <div class="space-y-1.5">
+              <div class="text-[11px] font-bold text-slate-400">こだわり条件</div>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-700 hover:text-emerald-700">
+                  <input type="checkbox" id="filterCheckCompleteOnly" onchange="applyFilters()" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
+                  <span class="font-bold">👑 箱説完品</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-700 hover:text-emerald-700">
+                  <input type="checkbox" id="filterCheckBatteryDone" onchange="applyFilters()" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
+                  <span>🔋 電池交換済</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-700 hover:text-emerald-700">
+                  <input type="checkbox" id="filterCheckCleanDone" onchange="applyFilters()" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
+                  <span>🧽 端子清掃済</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-700 hover:text-emerald-700">
+                  <input type="checkbox" id="filterCheckTestedDone" onchange="applyFilters()" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
+                  <span>🕹️ 動作確認済</span>
+                </label>
+              </div>
+            </div>
 
-        <!-- 記念日フィルターバッジ（カレンダー連動時のみ表示） -->
-        <div id="anniversaryFilterBanner" class="hidden items-center justify-between bg-amber-50 border border-amber-200 text-amber-900 px-3 py-2 rounded-xl text-xs font-bold">
-          <span id="anniversaryFilterText">記念日フィルター適用中</span>
-          <button type="button" onclick="clearAnniversaryFilter()" class="text-amber-700 hover:underline">解除する ✕</button>
-        </div>
+            <div class="space-y-1.5">
+              <div class="text-[11px] font-bold text-slate-400">状態ランク</div>
+              <div class="grid grid-cols-6 gap-1 text-[11px] text-center font-bold">
+                <button type="button" onclick="setRankFilter('ALL')" id="btnRank_ALL" class="py-1 rounded bg-slate-800 text-white">全</button>
+                <button type="button" onclick="setRankFilter('S')" id="btnRank_S" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">S</button>
+                <button type="button" onclick="setRankFilter('A')" id="btnRank_A" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">A</button>
+                <button type="button" onclick="setRankFilter('B')" id="btnRank_B" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">B</button>
+                <button type="button" onclick="setRankFilter('C')" id="btnRank_C" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">C</button>
+                <button type="button" onclick="setRankFilter('J')" id="btnRank_J" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">J</button>
+              </div>
+            </div>
+          </div>
 
-        <!-- ゲーム一覧コンテナ -->
-        <div id="gameContainer" class="min-h-[400px]">
-          <!-- JSで高速レンダリング -->
+          <!-- 対応ハード別クイック選択 -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-400">対応ハード</span>
+              <span id="activeHardLabel" class="text-[11px] font-bold text-emerald-600">すべて</span>
+            </div>
+            <div id="sidebarPlatformPills" class="flex flex-wrap gap-1 max-h-36 overflow-y-auto pr-1">
+              <!-- JSで動的生成 -->
+            </div>
+          </div>
         </div>
+      </aside>
 
-        <!-- 表示件数フッター -->
-        <div class="text-center text-xs text-slate-400 py-3">
-          表示中: <span id="filteredGamesCount" class="font-bold text-slate-700">0</span> 本
-        </div>
+      <!-- 記念日フィルターバッジ（カレンダー連動時のみ表示） -->
+      <div id="anniversaryFilterBanner" class="hidden items-center justify-between bg-amber-50 border border-amber-200 text-amber-900 px-3 py-2 rounded-xl text-xs font-bold">
+        <span id="anniversaryFilterText">記念日フィルター適用中</span>
+        <button type="button" onclick="clearAnniversaryFilter()" class="text-amber-700 hover:underline">解除する ✕</button>
+      </div>
 
+      <!-- ゲーム一覧コンテナ（ファーストビューですぐに表示される領域） -->
+      <div id="gameContainer" class="min-h-[400px]">
+        <!-- JSで高速レンダリング -->
+      </div>
+
+      <!-- 表示件数フッター -->
+      <div class="text-center text-xs text-slate-400 py-3">
+        表示中: <span id="filteredGamesCount" class="font-bold text-slate-700">0</span> 本
       </div>
 
     </div>
@@ -404,17 +405,22 @@
 
   </main>
 
-  <!-- ハード別コンプリート進捗モーダル -->
-  <div id="progressModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick="if(event.target === this) closeProgressModal()">
-    <div class="bg-white rounded-2xl max-w-xl w-full p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col" onclick="event.stopPropagation()">
+  <!-- ハード別コンプリート進捗モーダル（ID構造修正＆レスポンシブ拡張） -->
+  <div id="progressModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm" onclick="if(event.target === this) closeProgressModal()">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-4 sm:p-5 shadow-2xl space-y-4 max-h-[88vh] flex flex-col" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between border-b pb-3 flex-shrink-0">
-        <div>
-          <h3 class="font-black text-slate-900 text-base">ハード別コンプリート達成率</h3>
-          <p class="text-xs text-slate-400">各機種ごとの所持率および箱説完品率の内訳</p>
+        <div class="flex items-center gap-2">
+          <button type="button" id="progressBackBtn" onclick="showProgressTopLevel()" class="hidden p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 transition" title="戻る">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <div>
+            <h3 id="progressModalTitle" class="font-black text-slate-900 text-base">達成率・コンプリート状況</h3>
+            <p id="progressModalSubtitle" class="text-xs text-slate-400">確認したい達成率のカテゴリを選択してください</p>
+          </div>
         </div>
         <button type="button" onclick="closeProgressModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold">✕</button>
       </div>
-      <div id="progressListContainer" class="overflow-y-auto space-y-3 flex-1 pr-1">
+      <div id="progressModalBody" class="overflow-y-auto space-y-3 flex-1 pr-1">
         <!-- JSで動的生成 -->
       </div>
     </div>
@@ -695,14 +701,14 @@
     var STORAGE_KEY_POSTS = 'retrovault_play_posts_v3';
     var STORAGE_KEY_VIEW_MODE = 'retrovault_catalog_view_mode_v3';
 
-    // 所持タイトル プリセットリスト（約200タイトル）
+    // 所持タイトル プリセットリスト（自動強制登録は廃止し空配列化）
     var PRESET_OWNED_TITLES = [];
 
     // グローバル状態
     var catalog = [];
     var userStates = {};
     var playPosts = [];
-    var currentCollectFilter = 'all'; // 'owned' | 'all' | 'wanted' | 'playing' | 'unowned'
+    var currentCollectFilter = 'all'; // 初期表示は全タイトル
     var currentPlatformFilter = 'ALL';
     var currentRankFilter = 'ALL';
     var currentSort = 'release_asc';
@@ -713,6 +719,19 @@
     var calendarMonth = new Date().getMonth();
     var debounceTimer = null;
     var detailModalDirty = false;
+    var isFilterDrawerOpen = false;
+
+    // フィルターパネルの開閉トグル（スマホ・PC共通）
+    function toggleFilterDrawer() {
+      var panel = document.getElementById('filterSidebar');
+      var arrow = document.getElementById('filterArrowIcon');
+      if (!panel) return;
+      isFilterDrawerOpen = !isFilterDrawerOpen;
+      panel.classList.toggle('hidden', !isFilterDrawerOpen);
+      if (arrow) {
+        arrow.style.transform = isFilterDrawerOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+      }
+    }
 
     // 事前インデックス構築（検索時の文字列結合・小文字化の反復コストをゼロにする）
     function buildSearchIndexForCatalog() {
@@ -1086,7 +1105,7 @@
           if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
           if (text) text.textContent = 'マスター同期完了 (全 ' + catalog.length + ' 本)';
 
-          // 初回同期時にプリセットを自動適用
+          // 初回同期時の自動プリセット登録は停止（各自0本からスタート）
           // applyPresetTitles(true);
 
           updatePlatformSidebarPills(catalog);
