@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>レトロゲーム コレクション</title>
+  <title>レトロゲームコレクション</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDK (Compat版) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <style>
-    /* カスタムスクロールバー */
     ::-webkit-scrollbar { width: 7px; height: 7px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    
-    /* 3:4 アスペクト比固定（ジャケット表示用） */
     .aspect-jacket { aspect-ratio: 3 / 4; }
-
-    /* 未所持タイトルのモノクロ図鑑仕様 */
     .jacket-unowned {
       filter: grayscale(100%) contrast(90%) opacity(60%);
       transition: filter 0.3s ease, opacity 0.3s ease, transform 0.2s ease;
@@ -27,13 +26,13 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans select-none overflow-x-hidden w-full max-w-[100vw]">
 
-  <!-- ① メインヘッダー（スマホ特化：はみ出し防止＆コンパクト化） -->
+  <!-- ① メインヘッダー -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm w-full">
     <div class="max-w-7xl mx-auto px-2 sm:px-6">
       <div class="flex items-center justify-between h-14 sm:h-16 gap-1 sm:gap-2">
         
-        <!-- ロゴ -->
-        <div class="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer flex-shrink-0" onclick="switchNavTab('catalog')">
+        <!-- ロゴ / タイトル -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer flex-shrink-0" onclick="goToTop()">
           <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center flex-shrink-0 p-1">
             <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -60,12 +59,12 @@
             </svg>
           </div>
           <div>
-            <h1 class="font-black tracking-tight text-slate-900 text-xs sm:text-base leading-tight truncate max-w-[100px] sm:max-w-none">レトロゲーム</h1>
-            <p class="text-[9px] text-slate-400 font-medium hidden sm:block">レトロゲーム コレクション</p>
+            <h1 class="font-black tracking-tight text-slate-900 text-xs sm:text-base leading-tight truncate max-w-[150px] sm:max-w-none">レトロゲームコレクション</h1>
+            <p class="text-[9px] text-slate-400 font-medium hidden sm:block">レトロゲームを集めよう！</p>
           </div>
         </div>
 
-        <!-- ナビゲーションタブ（スマホ時はアイコン中心でスマート化） -->
+        <!-- ナビゲーションタブ -->
         <nav class="flex items-center gap-0.5 sm:gap-1">
           <button type="button" id="tabNavCatalog" onclick="switchNavTab('catalog')" title="ゲーム一覧" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
@@ -89,8 +88,26 @@
           </button>
         </nav>
 
-        <!-- アクションボタン（シート同期・CSV・エクスポート） -->
+        <!-- アクションボタン -->
         <div class="flex items-center gap-1 flex-shrink-0">
+          <div id="authContainer" class="flex items-center">
+            <button type="button" id="btnGoogleLogin" onclick="loginWithGoogle()" title="Googleログインして同期" class="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span class="hidden md:inline">ログイン</span>
+            </button>
+            <div id="userProfile" class="hidden items-center gap-1">
+              <img id="userAvatar" src="" alt="User" class="w-7 h-7 rounded-full border border-emerald-500 object-cover" title="クラウド同期有効">
+              <button type="button" onclick="logoutFromGoogle()" title="ログアウト" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-xl transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+              </button>
+            </div>
+          </div>
+
           <button type="button" id="btnSyncMaster" onclick="syncMasterCsv(false)" title="スプレッドシートマスターと同期" class="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition flex items-center gap-1">
             <svg id="syncIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             <span class="hidden md:inline">シート同期</span>
@@ -107,17 +124,14 @@
     </div>
   </header>
 
-  <!-- ② サマリーストリップ（スマホでも横はみ出ししないレスポンシブ配置） -->
+  <!-- ② サマリーストリップ -->
   <section class="bg-slate-900 text-slate-100 border-b border-slate-800 py-2 px-3 sm:px-6 shadow-inner w-full">
     <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-y-1.5 gap-x-2 text-[11px] sm:text-xs">
-      
-      <!-- 同期ステータス -->
       <div class="flex items-center gap-1.5 min-w-0">
         <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
         <span id="syncStatusText" class="text-slate-300 font-medium truncate max-w-[130px] sm:max-w-none">マスター読込中...</span>
       </div>
 
-      <!-- 収集指標サマリー -->
       <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
         <div class="flex items-center gap-1">
           <span class="text-slate-400 text-[10px]">所持:</span>
@@ -140,47 +154,39 @@
           <span class="font-black text-white text-xs sm:text-sm" id="sumCollectRate">0.0%</span>
         </div>
       </div>
-
     </div>
   </section>
 
   <!-- ③ メインコンテナ -->
   <main class="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex-1 w-full space-y-3">
     
-    <!-- カタログセクション（最上部検索バー ＆ 折りたたみ式フィルター） -->
     <div id="sectionCatalog" class="w-full space-y-3">
       
-      <!-- 【最優先】最上部 検索ツールバー（画面を開いて即座にタイトル検索・登録可能） -->
+      <!-- 検索ツールバー -->
       <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-        
-        <!-- 検索インプット（事前インデックス対応） -->
         <div class="relative flex-1">
           <input type="text" id="searchInput" oninput="debouncedApplyFilters()" placeholder="タイトル、メーカー、発売年ですぐに検索・登録..." class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
           <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <button type="button" onclick="clearSearchInput()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden" id="clearSearchBtn">✕</button>
         </div>
 
-        <!-- コントロールバー（フィルター開閉ボタン・ソート・表示切替） -->
         <div class="flex items-center gap-2 justify-between sm:justify-end flex-wrap">
-          
-          <!-- フィルター開閉トグルボタン（スマホ時はタップで展開、PCでも省スペース化可能） -->
           <button type="button" id="btnToggleFilterPanel" onclick="toggleFilterDrawer()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition border border-slate-200">
             <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
             <span>絞り込み</span>
             <span id="filterActiveBadge" class="w-2 h-2 rounded-full bg-emerald-500 hidden"></span>
-            <span id="filterArrowIcon" class="text-[10px] text-slate-400 transition-transform">▼</span>
+            <span id="filterArrowIcon" class="text-[10px] text-slate-400 transition-transform" style="transform: rotate(180deg);">▼</span>
           </button>
 
-          <!-- ソートセレクター -->
           <select id="sortSelect" onchange="applyFilters()" class="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
             <option value="release_asc">発売日 (古い順)</option>
             <option value="release_desc">発売日 (新しい順)</option>
+            <option value="rating_desc">面白さ順 (★)</option>
             <option value="title_asc">五十音順</option>
             <option value="rank_desc">美品順</option>
             <option value="price_desc">購入額順</option>
           </select>
 
-          <!-- 表示形式切り替えトグル（グリッド / リスト） -->
           <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
             <button type="button" id="btnViewGrid" onclick="setViewMode('grid')" title="ジャケットグリッド表示" class="p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
@@ -189,13 +195,11 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
           </div>
-
         </div>
-
       </div>
 
-      <!-- 絞り込みフィルターパネル（初期状態はスッキリ折りたたみ。タップでスムーズ展開） -->
-      <aside id="filterSidebar" class="hidden bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4 w-full transition-all duration-200">
+      <!-- 絞り込みフィルターパネル（デフォルト展開・4カラム構成） -->
+      <aside id="filterSidebar" class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4 w-full transition-all duration-200">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
@@ -207,18 +211,18 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- 収集ステータスフィルター -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- ① ステータス -->
           <div class="space-y-1.5">
-            <div class="text-[11px] font-bold text-slate-400">収集ステータス</div>
+            <div class="text-[11px] font-bold text-slate-400">ステータス</div>
             <div class="grid grid-cols-2 gap-1.5 text-xs">
-              <button type="button" onclick="setCollectionStatusFilter('all')" id="btnStatFilter_all" class="py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between">
-                <span>全タイトル</span>
-                <span id="badgeStat_all" class="text-[10px] opacity-80">0</span>
-              </button>
-              <button type="button" onclick="setCollectionStatusFilter('owned')" id="btnStatFilter_owned" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+              <button type="button" onclick="setCollectionStatusFilter('owned')" id="btnStatFilter_owned" class="py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between">
                 <span>所持のみ</span>
-                <span id="badgeStat_owned" class="text-[10px] text-slate-400">0</span>
+                <span id="badgeStat_owned" class="text-[10px] opacity-80">0</span>
+              </button>
+              <button type="button" onclick="setCollectionStatusFilter('cleared')" id="btnStatFilter_cleared" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                <span>クリア済み</span>
+                <span id="badgeStat_cleared" class="text-[10px] text-slate-400">0</span>
               </button>
               <button type="button" onclick="setCollectionStatusFilter('wanted')" id="btnStatFilter_wanted" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
                 <span>ほしい</span>
@@ -229,13 +233,17 @@
                 <span id="badgeStat_playing" class="text-[10px] text-slate-400">0</span>
               </button>
               <button type="button" onclick="setCollectionStatusFilter('unowned')" id="btnStatFilter_unowned" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left col-span-2 flex items-center justify-between">
-                <span>未所持タイトルのみ</span>
+                <span>未所持タイトル</span>
                 <span id="badgeStat_unowned" class="text-[10px] text-slate-400">0</span>
+              </button>
+              <button type="button" onclick="setCollectionStatusFilter('all')" id="btnStatFilter_all" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left col-span-2 flex items-center justify-between">
+                <span>全タイトル</span>
+                <span id="badgeStat_all" class="text-[10px] text-slate-400">0</span>
               </button>
             </div>
           </div>
 
-          <!-- こだわり条件 ＆ 状態ランク -->
+          <!-- ② こだわり条件 ＆ 面白さ ＆ 状態ランク -->
           <div class="space-y-3">
             <div class="space-y-1.5">
               <div class="text-[11px] font-bold text-slate-400">こだわり条件</div>
@@ -259,6 +267,20 @@
               </div>
             </div>
 
+            <!-- 面白さ・おすすめ度 絞り込みフィルター -->
+            <div class="space-y-1.5">
+              <div class="text-[11px] font-bold text-slate-400">面白さ・おすすめ度</div>
+              <div class="grid grid-cols-6 gap-1 text-[11px] text-center font-bold">
+                <button type="button" onclick="setRatingFilter(0)" id="btnRating_0" class="py-1 rounded bg-slate-800 text-white">全</button>
+                <button type="button" onclick="setRatingFilter(5)" id="btnRating_5" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">★5</button>
+                <button type="button" onclick="setRatingFilter(4)" id="btnRating_4" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">★4↑</button>
+                <button type="button" onclick="setRatingFilter(3)" id="btnRating_3" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">★3↑</button>
+                <button type="button" onclick="setRatingFilter(2)" id="btnRating_2" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">★2↑</button>
+                <button type="button" onclick="setRatingFilter(1)" id="btnRating_1" class="py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">★1↑</button>
+              </div>
+            </div>
+
+            <!-- 状態ランク -->
             <div class="space-y-1.5">
               <div class="text-[11px] font-bold text-slate-400">状態ランク</div>
               <div class="grid grid-cols-6 gap-1 text-[11px] text-center font-bold">
@@ -272,31 +294,35 @@
             </div>
           </div>
 
-          <!-- 対応ハード別クイック選択 -->
+          <!-- ③ 対応ハード別クイック選択 -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-bold text-slate-400">対応ハード</span>
               <span id="activeHardLabel" class="text-[11px] font-bold text-emerald-600">すべて</span>
             </div>
-            <div id="sidebarPlatformPills" class="flex flex-wrap gap-1 max-h-36 overflow-y-auto pr-1">
-              <!-- JSで動的生成 -->
+            <div id="sidebarPlatformPills" class="flex flex-wrap gap-1 max-h-48 overflow-y-auto pr-1"></div>
+          </div>
+
+          <!-- ④ ★ ジャンル別クイック選択 -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-400">ジャンル</span>
+              <span id="activeGenreLabel" class="text-[11px] font-bold text-emerald-600">すべて</span>
             </div>
+            <div id="sidebarGenrePills" class="flex flex-wrap gap-1 max-h-48 overflow-y-auto pr-1"></div>
           </div>
         </div>
       </aside>
 
-      <!-- 記念日フィルターバッジ（カレンダー連動時のみ表示） -->
+      <!-- 記念日フィルターバッジ -->
       <div id="anniversaryFilterBanner" class="hidden items-center justify-between bg-amber-50 border border-amber-200 text-amber-900 px-3 py-2 rounded-xl text-xs font-bold">
         <span id="anniversaryFilterText">記念日フィルター適用中</span>
         <button type="button" onclick="clearAnniversaryFilter()" class="text-amber-700 hover:underline">解除する ✕</button>
       </div>
 
-      <!-- ゲーム一覧コンテナ（ファーストビューですぐに表示される領域） -->
-      <div id="gameContainer" class="min-h-[400px]">
-        <!-- JSで高速レンダリング -->
-      </div>
+      <!-- ゲーム一覧コンテナ -->
+      <div id="gameContainer" class="min-h-[400px]"></div>
 
-      <!-- 表示件数フッター -->
       <div class="text-center text-xs text-slate-400 py-3">
         表示中: <span id="filteredGamesCount" class="font-bold text-slate-700">0</span> 本
       </div>
@@ -312,8 +338,6 @@
         </h3>
         <form onsubmit="handlePostSubmit(event)" class="space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            
-            <!-- 対象ゲーム（インクリメンタル検索＆コンボボックス） -->
             <div class="relative">
               <label class="block text-xs font-bold text-slate-500 mb-1">対象ゲーム</label>
               <input type="hidden" id="postGameId" required>
@@ -325,9 +349,7 @@
                 <button type="button" onclick="clearSelectedPostGame()" class="text-emerald-700 hover:text-emerald-900 text-[11px] ml-2 flex-shrink-0">変更 ✕</button>
               </div>
               <input type="text" id="postGameSearchInput" oninput="searchPostGames(this.value)" onfocus="searchPostGames(this.value)" placeholder="タイトルやハードを入力して検索..." class="w-full text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <div id="postGameSuggestBox" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto z-40 hidden divide-y divide-slate-100">
-                <!-- JSで候補生成 -->
-              </div>
+              <div id="postGameSuggestBox" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto z-40 hidden divide-y divide-slate-100"></div>
             </div>
 
             <div>
@@ -346,13 +368,10 @@
         </form>
       </div>
 
-      <!-- タイムライン -->
-      <div id="postsTimeline" class="space-y-3">
-        <!-- JSで動的レンダリング -->
-      </div>
+      <div id="postsTimeline" class="space-y-3"></div>
     </div>
 
-    <!-- カレンダーセクション（発売記念日） -->
+    <!-- カレンダーセクション -->
     <div id="sectionCalendar" class="space-y-4 hidden">
       <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
@@ -367,7 +386,6 @@
           </div>
         </div>
 
-        <!-- 曜日ヘッダー -->
         <div class="grid grid-cols-7 gap-1 text-center font-bold text-xs py-2 bg-slate-50 rounded-t-xl border border-slate-200">
           <div class="text-red-500">日</div>
           <div class="text-slate-700">月</div>
@@ -378,10 +396,7 @@
           <div class="text-blue-500">土</div>
         </div>
 
-        <!-- 日付セルグリッド -->
-        <div id="calendarGridDays" class="grid grid-cols-7 gap-1 border-x border-b border-slate-200 p-1 bg-slate-100 rounded-b-xl">
-          <!-- JSで動的生成 -->
-        </div>
+        <div id="calendarGridDays" class="grid grid-cols-7 gap-1 border-x border-b border-slate-200 p-1 bg-slate-100 rounded-b-xl"></div>
       </div>
     </div>
 
@@ -398,14 +413,12 @@
           <button type="button" onclick="switchNewsSource('google')" id="btnNewsSrc_google" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Google検索</button>
         </div>
       </div>
-      <div id="newsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- JSで動的レンダリング -->
-      </div>
+      <div id="newsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </div>
 
   </main>
 
-  <!-- ハード別コンプリート進捗モーダル（ID構造修正＆レスポンシブ拡張） -->
+  <!-- ハード別コンプリート進捗モーダル -->
   <div id="progressModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm" onclick="if(event.target === this) closeProgressModal()">
     <div class="bg-white rounded-3xl max-w-2xl w-full p-4 sm:p-5 shadow-2xl space-y-4 max-h-[88vh] flex flex-col" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between border-b pb-3 flex-shrink-0">
@@ -420,17 +433,15 @@
         </div>
         <button type="button" onclick="closeProgressModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold">✕</button>
       </div>
-      <div id="progressModalBody" class="overflow-y-auto space-y-3 flex-1 pr-1">
-        <!-- JSで動的生成 -->
-      </div>
+      <div id="progressModalBody" class="overflow-y-auto space-y-3 flex-1 pr-1"></div>
     </div>
   </div>
 
-  <!-- ④ ゲーム詳細モーダル（爆速トグル＆収集特化画面） -->
+  <!-- ④ ゲーム詳細モーダル -->
   <div id="detailModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto" onclick="if(event.target === this) closeDetailModal()">
     <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative flex flex-col max-h-[92vh] my-auto" onclick="event.stopPropagation()">
       
-      <!-- ヘッダー（タイトル・ハード・発売日・完品バッジ） -->
+      <!-- ヘッダー -->
       <div id="detailHeaderBg" class="relative p-5 text-white min-h-[130px] flex flex-col justify-end bg-slate-900 overflow-hidden">
         <div id="detailCoverImageLayer" class="absolute inset-0 bg-cover bg-center transition-all duration-300 pointer-events-none opacity-0 scale-105"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-950/40 pointer-events-none"></div>
@@ -441,32 +452,55 @@
 
         <div class="relative z-10 flex flex-wrap items-center gap-2 mb-1.5">
           <span id="detailBadgeHard" class="px-2 py-0.5 rounded text-[11px] font-black bg-amber-400 text-slate-950 shadow">--</span>
+          <span id="detailStatusBadge" class="px-2 py-0.5 rounded text-[11px] font-black bg-slate-700 text-slate-300 shadow">未所持</span>
           <span id="detailCompleteBadge" class="hidden px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500 text-white shadow">👑 箱説完品</span>
           <span id="detailReleaseDate" class="text-xs text-slate-300 font-medium">--</span>
         </div>
         <h3 id="detailTitle" class="relative z-10 text-xl sm:text-2xl font-black leading-tight drop-shadow-md text-white">--</h3>
       </div>
 
-      <!-- モーダル本文（現場操作特化型トグル） -->
+      <!-- モーダル本文 -->
       <div class="p-5 overflow-y-auto space-y-4 flex-1 bg-slate-50/70 text-xs">
         
-        <!-- 収集ステータストグル（所持 / ほしい / プレイ中） -->
+        <!-- ステータストグル -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div class="text-[11px] font-bold text-slate-400">収集ステータス</div>
+          <div class="text-[11px] font-bold text-slate-400">ステータス</div>
           <div class="grid grid-cols-3 gap-1.5">
-            <button type="button" onclick="setDetailCollectStatus('owned')" id="btnDetailCollect_owned" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+            <button type="button" onclick="setDetailCollectStatus('owned')" id="btnDetailCollect_owned" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
               <span>📦 所持</span>
             </button>
-            <button type="button" onclick="setDetailCollectStatus('wanted')" id="btnDetailCollect_wanted" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>ほしい</span>
+            <button type="button" onclick="setDetailCollectStatus('cleared')" id="btnDetailCollect_cleared" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+              <span>🏆 クリア済</span>
             </button>
-            <button type="button" onclick="setDetailCollectStatus('playing')" id="btnDetailCollect_playing" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>プレイ中</span>
+            <button type="button" onclick="setDetailCollectStatus('playing')" id="btnDetailCollect_playing" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+              <span>🎮 プレイ中</span>
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" onclick="setDetailCollectStatus('wanted')" id="btnDetailCollect_wanted" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+              <span>⭐ ほしい</span>
+            </button>
+            <button type="button" onclick="setDetailCollectStatus('unowned')" id="btnDetailCollect_unowned" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+              <span>✕ 未所持</span>
             </button>
           </div>
         </div>
 
-        <!-- ① 付属品トグル（箱・説明書・ハガキ・帯・マップ特典） ➔ 全てTrueで「👑 完品」自動判定 -->
+        <!-- 面白さ・おすすめ度 評価軸 -->
+        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-400">面白さ・おすすめ度</span>
+            <span id="detailRatingText" class="text-[11px] font-bold text-slate-400">未評価</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div id="detailRatingStars" class="flex items-center gap-1.5 text-2xl select-none cursor-pointer"></div>
+            <button type="button" onclick="setDetailRating(0)" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold px-2 py-1 rounded bg-slate-50 border border-slate-200 transition">
+              クリア
+            </button>
+          </div>
+        </div>
+
+        <!-- 付属品トグル -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold text-slate-400">付属品チェック（すべて揃うと自動で完品）</span>
@@ -496,7 +530,7 @@
           </div>
         </div>
 
-        <!-- ② メンテナンス状態トグル（端子清掃・電池交換・動作確認・未開封） -->
+        <!-- メンテナンス状態トグル -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <span class="text-[11px] font-bold text-slate-400">メンテナンス状態</span>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
@@ -515,7 +549,7 @@
           </div>
         </div>
 
-        <!-- ③ 状態ランク（S/A/B/C/J）＆ バージョン/型番メモ -->
+        <!-- コンディション・状態ランク ＆ バージョンメモ -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
           <div>
             <span class="text-[11px] font-bold text-slate-400 mb-1.5 block">コンディション・状態ランク</span>
@@ -533,7 +567,7 @@
           </div>
         </div>
 
-        <!-- スペック情報枠 ＆ サムネイルプレビュー -->
+        <!-- スペック情報枠 -->
         <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
@@ -554,7 +588,7 @@
             </div>
           </div>
 
-          <!-- サムネイル枠 ＆ URL直接入力欄 -->
+          <!-- サムネイル枠 -->
           <div class="pt-2 border-t border-slate-100 space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-[10px] text-slate-400 font-bold">サムネイル画像 (URL入力 / G列自動取得)</span>
@@ -573,7 +607,7 @@
           </div>
         </div>
 
-        <!-- ④ 取得情報・保管・重複管理 -->
+        <!-- 取得情報・保管・重複管理 -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
           <div class="text-[11px] font-bold text-slate-400">取得情報・保管場所・ダブり数</div>
           <div class="grid grid-cols-2 gap-2">
@@ -604,7 +638,6 @@
             </div>
           </div>
           
-          <!-- ダブり本数カウンター -->
           <div class="flex items-center justify-between pt-1 border-t border-slate-100">
             <span class="text-xs text-slate-600 font-bold">ダブり所持本数 (同一タイトル):</span>
             <div class="flex items-center gap-2">
@@ -615,7 +648,7 @@
           </div>
         </div>
 
-        <!-- ⑤ このゲームのつぶやき・プレイ記録 -->
+        <!-- つぶやき・プレイ記録 -->
         <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
@@ -625,7 +658,6 @@
             <span id="detailPostCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">0件</span>
           </div>
           
-          <!-- クイック投稿フォーム -->
           <div class="flex gap-1.5">
             <input type="text" id="detailQuickPostInput" placeholder="このゲームの感想、攻略メモなどをつぶやく..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-500">
             <button type="button" onclick="handleDetailQuickPostSubmit()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex-shrink-0">
@@ -633,13 +665,10 @@
             </button>
           </div>
 
-          <!-- つぶやき一覧コンテナ -->
-          <div id="detailPostListContainer" class="max-h-40 overflow-y-auto space-y-2 pr-0.5">
-            <!-- JSで動的生成 -->
-          </div>
+          <div id="detailPostListContainer" class="max-h-40 overflow-y-auto space-y-2 pr-0.5"></div>
         </div>
 
-        <!-- 外部参照用のアクションボタン（Wikipedia / YouTube / Web検索） -->
+        <!-- 外部参照ボタン -->
         <div class="grid grid-cols-3 gap-2">
           <a id="detailWikiBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-center transition flex items-center justify-center gap-1 shadow-sm">
             <span>📖 Wikipedia</span>
@@ -652,7 +681,7 @@
           </a>
         </div>
 
-        <!-- 相場検索リンク（メルカリ ＆ ヤフーフリマ） -->
+        <!-- 相場検索リンク -->
         <div class="grid grid-cols-2 gap-2 pt-1">
           <a id="detailMercariBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-center transition shadow flex items-center justify-center gap-1.5">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
@@ -695,22 +724,36 @@
 
   <!-- ⑤ JavaScript アプリケーションコア -->
   <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBs_9uxZDVTOQ-bS4l5Qmbe4jBzGqKAMqc",
+      authDomain: "retrogame-collection.firebaseapp.com",
+      projectId: "retrogame-collection",
+      storageBucket: "retrogame-collection.firebasestorage.app",
+      messagingSenderId: "693227231373",
+      appId: "1:693227231373:web:6466ddff52a7027005eac4",
+      measurementId: "G-NQXNV1X7DD"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+    var currentUser = null;
+    var firestoreUnsubscribe = null;
+    var firestoreSyncTimer = null;
+
     var MASTER_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQSUJIaD7Mr4PjO1O1-uNMiwMQdpKCiO8e1aZ3pbNp4LCO_EbXQpNNwoe0pWNptfaOzM5jY2T7BLGVe/pub?gid=1641792250&single=true&output=csv';
     var STORAGE_KEY_CATALOG = 'retrovault_master_catalog_cache_v3';
     var STORAGE_KEY_USER_STATES = 'retrovault_user_states_v3';
     var STORAGE_KEY_POSTS = 'retrovault_play_posts_v3';
     var STORAGE_KEY_VIEW_MODE = 'retrovault_catalog_view_mode_v3';
 
-    // 所持タイトル プリセットリスト（自動強制登録は廃止し空配列化）
-    var PRESET_OWNED_TITLES = [];
-
-    // グローバル状態
     var catalog = [];
     var userStates = {};
     var playPosts = [];
-    var currentCollectFilter = 'all'; // 初期表示は全タイトル
+    var currentCollectFilter = 'owned';
     var currentPlatformFilter = 'ALL';
+    var currentGenreFilter = 'ALL'; // ★ ジャンルフィルター状態
     var currentRankFilter = 'ALL';
+    var currentRatingFilter = 0;
     var currentSort = 'release_asc';
     var currentAnniversaryFilter = null;
     var currentDetailGame = null;
@@ -719,9 +762,14 @@
     var calendarMonth = new Date().getMonth();
     var debounceTimer = null;
     var detailModalDirty = false;
-    var isFilterDrawerOpen = false;
+    var isFilterDrawerOpen = true;
 
-    // フィルターパネルの開閉トグル（スマホ・PC共通）
+    function goToTop() {
+      switchNavTab('catalog');
+      resetAllFilters();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function toggleFilterDrawer() {
       var panel = document.getElementById('filterSidebar');
       var arrow = document.getElementById('filterArrowIcon');
@@ -733,7 +781,6 @@
       }
     }
 
-    // 事前インデックス構築（検索時の文字列結合・小文字化の反復コストをゼロにする）
     function buildSearchIndexForCatalog() {
       for (var i = 0; i < catalog.length; i++) {
         var g = catalog[i];
@@ -741,7 +788,6 @@
       }
     }
 
-    // 文字列ユーティリティ
     function isValidHttpUrl(str) {
       if (!str || typeof str !== 'string') return false;
       var trimmed = str.trim();
@@ -778,7 +824,7 @@
     function cleanTitleForMatch(str) {
       if (!str) return '';
       return String(str)
-        .replace(/[ 　\t\r\n]/g, '')
+        .replace(/[  \t\r\n]/g, '')
         .replace(/[！!？?・:：〜~～\-\_\/]/g, '')
         .replace(/[ⅠI]/g, '1')
         .replace(/[ⅡII]/g, '2')
@@ -820,30 +866,29 @@
       return mmdd;
     }
 
-    // ユーザー状態オブジェクトの生成・統合（完品判定を自動同期）
     function getUserState(game) {
       var key = makeStateKey(game.title, game.platform);
       var state = userStates[key];
       if (state) {
-        // 付属品5点が揃っていれば完品フラグを自動更新
-        var isComp = Boolean(state.box && state.manual && state.postcard && state.obi && state.bonus);
+        var st = state.status || 'unowned';
+        var isOwned = (st === 'owned' || st === 'cleared');
+        var isComp = isOwned && Boolean(state.box && state.manual && state.postcard && state.obi && state.bonus);
+
         return {
-          status: state.status || (state.owned ? 'owned' : 'unowned'),
-          owned: (state.status === 'owned') || (Boolean(state.owned) && state.status !== 'unowned'),
-          // 付属品
+          status: st,
+          owned: isOwned,
           box: Boolean(state.box),
           manual: Boolean(state.manual),
           postcard: Boolean(state.postcard),
           obi: Boolean(state.obi),
           bonus: Boolean(state.bonus),
           complete: isComp,
-          // メンテナンス
           cleaned: Boolean(state.cleaned),
           battery: Boolean(state.battery),
           tested: Boolean(state.tested),
           sealed: Boolean(state.sealed),
-          // コンディション・資産・重複
           rank: state.rank || 'B',
+          rating: parseInt(state.rating, 10) || 0,
           version_memo: state.version_memo || '',
           price: parseInt(state.price, 10) || 0,
           date: state.date || '',
@@ -868,6 +913,7 @@
         tested: false,
         sealed: false,
         rank: 'B',
+        rating: 0,
         version_memo: '',
         price: 0,
         date: '',
@@ -904,6 +950,7 @@
           tested: u.tested,
           sealed: u.sealed,
           rank: u.rank,
+          rating: u.rating,
           version_memo: u.version_memo,
           price: u.price,
           date: u.date,
@@ -915,7 +962,83 @@
       });
     }
 
-    // ローカルストレージ
+    function loginWithGoogle() {
+      var provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(function(err) {
+        console.error("ログイン失敗:", err);
+        showToast("ログインに失敗しました: " + err.message, "error");
+      });
+    }
+
+    function logoutFromGoogle() {
+      auth.signOut().then(function() {
+        if (firestoreUnsubscribe) firestoreUnsubscribe();
+        currentUser = null;
+        updateAuthDisplay(null);
+        showToast("ログアウトしました", "info");
+      });
+    }
+
+    auth.onAuthStateChanged(function(user) {
+      currentUser = user;
+      updateAuthDisplay(user);
+      if (user) {
+        bindFirestoreUser(user.uid);
+      }
+    });
+
+    function updateAuthDisplay(user) {
+      var btnLogin = document.getElementById('btnGoogleLogin');
+      var userProfile = document.getElementById('userProfile');
+      var userAvatar = document.getElementById('userAvatar');
+      if (user) {
+        if (btnLogin) btnLogin.classList.add('hidden');
+        if (userProfile) { userProfile.classList.remove('hidden'); userProfile.classList.add('flex'); }
+        if (userAvatar) userAvatar.src = user.photoURL || '';
+      } else {
+        if (btnLogin) btnLogin.classList.remove('hidden');
+        if (userProfile) { userProfile.classList.add('hidden'); userProfile.classList.remove('flex'); }
+        if (userAvatar) userAvatar.src = '';
+      }
+    }
+
+    function bindFirestoreUser(uid) {
+      if (firestoreUnsubscribe) firestoreUnsubscribe();
+
+      firestoreUnsubscribe = db.collection('users').doc(uid).onSnapshot(function(doc) {
+        if (doc.exists) {
+          var data = doc.data();
+          userStates = data.userStates || {};
+          playPosts = data.playPosts || [];
+
+          localStorage.setItem(STORAGE_KEY_USER_STATES, JSON.stringify(userStates));
+          localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(playPosts));
+
+          updateDashboardSummary();
+          applyFilters();
+          renderPlayPosts();
+        } else {
+          syncToFirestore();
+        }
+      }, function(err) {
+        console.error("Firestore同期エラー:", err);
+      });
+    }
+
+    function syncToFirestore() {
+      if (!currentUser) return;
+      clearTimeout(firestoreSyncTimer);
+      firestoreSyncTimer = setTimeout(function() {
+        db.collection('users').doc(currentUser.uid).set({
+          userStates: userStates,
+          playPosts: playPosts,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function(err) {
+          console.error("クラウド保存失敗:", err);
+        });
+      }, 400);
+    }
+
     function loadSavedStates() {
       try {
         var s = localStorage.getItem(STORAGE_KEY_USER_STATES);
@@ -946,6 +1069,7 @@
         localStorage.setItem(STORAGE_KEY_USER_STATES, JSON.stringify(userStates));
       } catch (e) { console.error('保存失敗:', e); }
       updateDashboardSummary();
+      syncToFirestore();
     }
 
     function saveCatalogToLocal() {
@@ -958,9 +1082,9 @@
       try {
         localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(playPosts));
       } catch (e) {}
+      syncToFirestore();
     }
 
-    // CSVパーサー
     function parseCsvToRows(csvText) {
       var rows = [];
       var currentRow = [];
@@ -1032,7 +1156,6 @@
       });
     }
 
-    // スプレッドシート同期
     function syncMasterCsv(isSilent) {
       var dot = document.getElementById('syncStatusDot');
       var text = document.getElementById('syncStatusText');
@@ -1054,7 +1177,7 @@
           var colPlatform = 2;
           var colPublisher = 3;
           var colGenre = 4;
-          var colCoverUrl = 6; // G列 (サムネイルURL)
+          var colCoverUrl = 6;
 
           if (rows.length > 0) {
             var header = rows[0].map(function(c) { return String(c || '').trim().toLowerCase(); });
@@ -1105,10 +1228,8 @@
           if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
           if (text) text.textContent = 'マスター同期完了 (全 ' + catalog.length + ' 本)';
 
-          // 初回同期時の自動プリセット登録は停止（各自0本からスタート）
-          // applyPresetTitles(true);
-
           updatePlatformSidebarPills(catalog);
+          updateGenreSidebarPills(catalog); // ★ ジャンルタグ生成
           applyFilters();
           renderCalendar();
           if (!isSilent) showToast('スプレッドシートマスターを最新化しました', 'success');
@@ -1123,43 +1244,6 @@
         });
     }
 
-    // プリセット約200タイトルの適用
-    function applyPresetTitles(isSilent) {
-      if (!catalog || catalog.length === 0) return;
-      var cleanMap = {};
-      PRESET_OWNED_TITLES.forEach(function(title) {
-        cleanMap[cleanTitleForMatch(title)] = true;
-      });
-
-      var count = 0;
-      catalog.forEach(function(g) {
-        var clean = cleanTitleForMatch(g.title);
-        if (cleanMap[clean]) {
-          var k = makeStateKey(g.title, g.platform);
-          if (!userStates[k]) {
-            userStates[k] = {
-              status: 'owned',
-              owned: true,
-              box: false,
-              manual: false,
-              postcard: false,
-              obi: false,
-              bonus: false,
-              rank: 'B',
-              duplicate_count: 1
-            };
-            count++;
-          }
-        }
-      });
-
-      if (count > 0) {
-        saveUserStates();
-        if (!isSilent) showToast(count + ' 本のタイトルを「所持」にプリセット反映しました', 'success');
-      }
-    }
-
-    // 表示形式切替
     function setViewMode(mode) {
       currentViewMode = mode;
       localStorage.setItem(STORAGE_KEY_VIEW_MODE, mode);
@@ -1172,7 +1256,6 @@
       applyFilters();
     }
 
-    // フィルター操作
     function debouncedApplyFilters() {
       clearTimeout(debounceTimer);
       var input = document.getElementById('searchInput');
@@ -1193,14 +1276,14 @@
 
     function setCollectionStatusFilter(status) {
       currentCollectFilter = status;
-      var buttons = ['owned', 'all', 'wanted', 'playing', 'unowned'];
+      var buttons = ['owned', 'cleared', 'wanted', 'playing', 'unowned', 'all'];
       buttons.forEach(function(st) {
         var el = document.getElementById('btnStatFilter_' + st);
         if (el) {
           if (st === status) {
-            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between ' + (st === 'unowned' ? 'col-span-2' : '');
+            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between ' + (st === 'unowned' || st === 'all' ? 'col-span-2' : '');
           } else {
-            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between ' + (st === 'unowned' ? 'col-span-2' : '');
+            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between ' + (st === 'unowned' || st === 'all' ? 'col-span-2' : '');
           }
         }
       });
@@ -1219,10 +1302,23 @@
       applyFilters();
     }
 
+    function setRatingFilter(rating) {
+      currentRatingFilter = rating;
+      [0, 5, 4, 3, 2, 1].forEach(function(rt) {
+        var el = document.getElementById('btnRating_' + rt);
+        if (el) {
+          el.className = (rt === rating) ? 'py-1 rounded bg-slate-800 text-white' : 'py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700';
+        }
+      });
+      applyFilters();
+    }
+
     function resetAllFilters() {
       currentCollectFilter = 'owned';
       currentPlatformFilter = 'ALL';
+      currentGenreFilter = 'ALL'; // ★ ジャンルリセット
       currentRankFilter = 'ALL';
+      currentRatingFilter = 0;
       currentAnniversaryFilter = null;
       var searchInput = document.getElementById('searchInput');
       if (searchInput) searchInput.value = '';
@@ -1239,8 +1335,18 @@
       var banner = document.getElementById('anniversaryFilterBanner');
       if (banner) banner.classList.add('hidden');
 
+      var hardLabel = document.getElementById('activeHardLabel');
+      if (hardLabel) hardLabel.textContent = 'すべて';
+
+      var genreLabel = document.getElementById('activeGenreLabel');
+      if (genreLabel) genreLabel.textContent = 'すべて';
+
+      updatePlatformSidebarPills(catalog);
+      updateGenreSidebarPills(catalog);
+
       setCollectionStatusFilter('owned');
       setRankFilter('ALL');
+      setRatingFilter(0);
       applyFilters();
     }
 
@@ -1252,10 +1358,8 @@
     }
 
     function filterByAnniversary(mmdd) {
-      // 1. カタログ一覧タブへ移動
       switchNavTab('catalog');
 
-      // 2. 検索キーワードやこだわり条件のチェックを初期化
       var searchInput = document.getElementById('searchInput');
       if (searchInput) searchInput.value = '';
       var clearBtn = document.getElementById('clearSearchBtn');
@@ -1272,21 +1376,24 @@
       if (chkTest) chkTest.checked = false;
       if (chkFav) chkFav.checked = false;
 
-      // 3. ハード絞り込み・状態ランクを「すべて」にリセット
       currentPlatformFilter = 'ALL';
       var label = document.getElementById('activeHardLabel');
       if (label) label.textContent = 'すべて';
-      updatePlatformSidebarPills(catalog);
-      setRankFilter('ALL');
 
-      // 4. 記念日フィルターを確実に代入（※resetAllFiltersは呼ばない）
+      currentGenreFilter = 'ALL';
+      var gLabel = document.getElementById('activeGenreLabel');
+      if (gLabel) gLabel.textContent = 'すべて';
+
+      updatePlatformSidebarPills(catalog);
+      updateGenreSidebarPills(catalog);
+      setRankFilter('ALL');
+      setRatingFilter(0);
+
       currentAnniversaryFilter = mmdd;
 
-      // 5. 全カタログから該当日のタイトルを抽出するため「全タイトル」ステータスを選択
       currentCollectFilter = 'all';
       setCollectionStatusFilter('all');
       
-      // 6. 記念日適用バナーを表示
       var banner = document.getElementById('anniversaryFilterBanner');
       var text = document.getElementById('anniversaryFilterText');
       if (banner && text) {
@@ -1294,7 +1401,6 @@
         banner.classList.remove('hidden');
       }
 
-      // 7. 該当発売日のソフトのみを抽出して描画
       applyFilters();
     }
 
@@ -1331,7 +1437,41 @@
       applyFilters();
     }
 
-    // フィルタリング・ソート・メイン描画
+    // ★ ジャンルタグの動的生成
+    function updateGenreSidebarPills(list) {
+      var counts = {};
+      list.forEach(function(g) {
+        var gen = (g.genre || '未分類').trim();
+        counts[gen] = (counts[gen] || 0) + 1;
+      });
+
+      var genres = Object.keys(counts).sort();
+      var container = document.getElementById('sidebarGenrePills');
+      if (!container) return;
+
+      var html = '<button type="button" onclick="setQuickGenre(\'ALL\')" class="px-2 py-0.5 rounded-md text-[11px] font-bold transition ' + 
+        (currentGenreFilter === 'ALL' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200') + 
+        '">すべて (' + list.length + ')</button>';
+
+      genres.forEach(function(gen) {
+        var isSel = (currentGenreFilter === gen);
+        html += '<button type="button" onclick="setQuickGenre(\'' + escapeHtml(gen) + '\')" class="px-2 py-0.5 rounded-md text-[11px] font-bold transition ' + 
+          (isSel ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200') + 
+          '">' + escapeHtml(gen) + ' <span class="opacity-75 font-normal text-[10px]">(' + counts[gen] + ')</span></button>';
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ★ ジャンル切り替え
+    function setQuickGenre(genre) {
+      currentGenreFilter = genre;
+      var label = document.getElementById('activeGenreLabel');
+      if (label) label.textContent = (genre === 'ALL') ? 'すべて' : genre;
+      updateGenreSidebarPills(catalog);
+      applyFilters();
+    }
+
     function applyFilters() {
       var q = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim().toLowerCase();
       var sortVal = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'release_asc';
@@ -1346,30 +1486,35 @@
         var g = catalog[i];
         var u = getUserState(g);
 
-        // 収集ステータス
         if (currentCollectFilter === 'owned' && !u.owned) continue;
+        if (currentCollectFilter === 'cleared' && u.status !== 'cleared') continue;
         if (currentCollectFilter === 'wanted' && u.status !== 'wanted') continue;
         if (currentCollectFilter === 'playing' && u.status !== 'playing') continue;
         if (currentCollectFilter === 'unowned' && u.owned) continue;
 
-        // ハード
         if (currentPlatformFilter !== 'ALL' && g.platform !== currentPlatformFilter) continue;
+        
+        // ★ ジャンル判定
+        if (currentGenreFilter !== 'ALL') {
+          var gGenre = (g.genre || '未分類').trim();
+          if (gGenre !== currentGenreFilter) continue;
+        }
 
-        // 状態ランク
         if (currentRankFilter !== 'ALL' && u.rank !== currentRankFilter) continue;
 
-        // こだわり条件
+        if (currentRatingFilter > 0) {
+          if ((u.rating || 0) < currentRatingFilter) continue;
+        }
+
         if (chkComp && !u.complete) continue;
         if (chkBat && !u.battery) continue;
         if (chkClean && !u.cleaned) continue;
         if (chkTest && !u.tested) continue;
 
-        // 記念日
         if (currentAnniversaryFilter) {
           if (getMonthDayString(g.release_date) !== currentAnniversaryFilter) continue;
         }
 
-        // 事前インデックスによる高速検索
         if (q) {
           if (!g._searchIndex || g._searchIndex.indexOf(q) === -1) continue;
         }
@@ -1390,23 +1535,23 @@
           tested: u.tested,
           sealed: u.sealed,
           rank: u.rank,
+          rating: u.rating,
           version_memo: u.version_memo,
           price: u.price,
           duplicate_count: u.duplicate_count
         });
       }
 
-      // ソート
       filtered.sort(function(a, b) {
         if (sortVal === 'release_asc') return (a.release_date || '9999').localeCompare(b.release_date || '9999');
         if (sortVal === 'release_desc') return (b.release_date || '0000').localeCompare(a.release_date || '0000');
+        if (sortVal === 'rating_desc') return (b.rating || 0) - (a.rating || 0);
         if (sortVal === 'title_asc') return (a.title || '').localeCompare(b.title || '', 'ja');
         if (sortVal === 'rank_desc') return (a.rank || 'Z').localeCompare(b.rank || 'Z');
         if (sortVal === 'price_desc') return (b.price || 0) - (a.price || 0);
         return 0;
       });
 
-      // 全件一括DOM化（19万ノード同時生成）を廃止し、初期表示バッチのみを即時描画
       currentFilteredList = filtered;
       renderedCount = 0;
 
@@ -1449,7 +1594,6 @@
       renderedCount += nextBatch.length;
     }
 
-    // スクロール時に画面末尾へ近づいたら次バッチ（60件）を逐次追加（新規コンポーネント・HTML変更なし）
     window.addEventListener('scroll', function() {
       if (isBatchRendering) return;
       if (renderedCount >= currentFilteredList.length) return;
@@ -1460,7 +1604,6 @@
       }
     }, { passive: true });
 
-    // 本棚ビュー（3:4 アスペクト比・未所持モノクロ仕様）
     function renderGameGridHtml(list) {
       if (list.length === 0) {
         return '<div class="col-span-full py-16 text-center text-slate-400 text-xs">条件に合致するタイトルが見つかりませんでした。</div>';
@@ -1478,16 +1621,25 @@
               '<span class="text-xs font-black truncate max-w-full px-1 mt-1">' + escapeHtml(game.title) + '</span>' +
             '</div>';
 
-        // 状態バッジ（完品 / ランク / ダブり数）
         var badgesHtml = '';
-        if (isOwned) {
+        if (game.status === 'cleared') {
+          badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">🏆 クリア済</span>';
+        } else if (isOwned) {
           if (game.complete) badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">👑 完品</span>';
-          if (game.rank) badgesHtml += '<span class="px-1 py-0.5 rounded bg-slate-900/80 text-white font-black text-[9px]">' + game.rank + '</span>';
-          if (game.duplicate_count > 1) badgesHtml += '<span class="px-1 py-0.5 rounded bg-blue-600 text-white font-black text-[9px]">×' + game.duplicate_count + '</span>';
         } else if (game.status === 'wanted') {
           badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-sky-500 text-white font-black text-[9px] shadow">ほしい</span>';
         } else if (game.status === 'playing') {
           badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-purple-500 text-white font-black text-[9px] shadow">プレイ中</span>';
+        }
+
+        if (game.rating > 0) {
+          var starStr = '★'.repeat(game.rating);
+          badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-slate-900/90 text-amber-400 font-bold text-[10px] tracking-tight shadow border border-amber-400/30">' + starStr + '</span>';
+        }
+
+        if (isOwned) {
+          if (game.rank) badgesHtml += '<span class="px-1 py-0.5 rounded bg-slate-900/80 text-white font-black text-[9px]">' + game.rank + '</span>';
+          if (game.duplicate_count > 1) badgesHtml += '<span class="px-1 py-0.5 rounded bg-blue-600 text-white font-black text-[9px]">×' + game.duplicate_count + '</span>';
         }
 
         return '<div id="gameCard_' + game.id + '" onclick="openDetailModal(\'' + game.id + '\')" class="group relative bg-white rounded-2xl border ' + 
@@ -1499,21 +1651,17 @@
             coverHtml +
             '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none"></div>' +
             
-            // 左上：ハードバッジ
             '<div class="absolute top-2 left-2 z-10">' +
               '<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-slate-900/90 text-white backdrop-blur-sm">' + escapeHtml(game.platform) + '</span>' +
             '</div>' +
 
-            // 右上：完品・ランクバッジ
             '<div class="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">' +
               badgesHtml +
             '</div>' +
 
-            // 左下：発売年
             (year ? '<div class="absolute bottom-2 left-2 z-10 text-[10px] font-black text-slate-300 drop-shadow">' + year + '年</div>' : '') +
           '</div>' +
 
-          // タイトル
           '<div class="p-2.5 flex-1 flex flex-col justify-between gap-1">' +
             '<h4 class="font-black text-slate-800 text-xs leading-snug group-hover:text-emerald-600 transition line-clamp-2" title="' + escapeHtml(game.title) + '">' + 
               escapeHtml(game.title) + 
@@ -1536,9 +1684,11 @@
           '<div class="flex items-center gap-3 flex-1 min-w-0">' +
             '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-slate-800 text-white flex-shrink-0">' + escapeHtml(game.platform) + '</span>' +
             '<div class="min-w-0 flex-1">' +
-              '<div class="flex items-center gap-2">' +
+              '<div class="flex items-center gap-2 flex-wrap">' +
                 '<h4 class="font-bold text-slate-800 text-xs sm:text-sm truncate">' + escapeHtml(game.title) + '</h4>' +
+                (game.status === 'cleared' ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">🏆 クリア済</span>' : '') +
                 (game.complete ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">👑 完品</span>' : '') +
+                (game.rating > 0 ? '<span class="text-amber-500 font-bold text-xs tracking-tight flex-shrink-0 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">' + '★'.repeat(game.rating) + '</span>' : '') +
               '</div>' +
               '<div class="flex items-center gap-2 text-[11px] text-slate-400 truncate mt-0.5">' +
                 '<span>' + escapeHtml(game.publisher) + '</span>' +
@@ -1548,14 +1698,14 @@
             '</div>' +
           '</div>' +
           '<div class="flex items-center gap-3 text-xs flex-shrink-0">' +
-            (isOwned ? '<span class="font-black text-emerald-600 text-xs">所持</span>' : '<span class="text-slate-400 text-xs">未所持</span>') +
+            (game.status === 'cleared' ? '<span class="font-black text-amber-500 text-xs">クリア済</span>' :
+             isOwned ? '<span class="font-black text-emerald-600 text-xs">所持</span>' : '<span class="text-slate-400 text-xs">未所持</span>') +
             (game.rank ? '<span class="px-1.5 py-0.5 rounded bg-slate-100 font-bold text-slate-600 text-[10px]">' + game.rank + '</span>' : '') +
           '</div>' +
         '</div>';
       }).join('');
     }
 
-    // 詳細モーダル操作（爆速トグル）
     function openDetailModal(gameId) {
       var game = null;
       for (var i = 0; i < catalog.length; i++) {
@@ -1570,15 +1720,13 @@
       detailModalDirty = false;
       var u = getUserState(game);
 
-      // モーダルを開いたときは初期表示としてタブ1（メイン）を選択
-      switchDetailTab('main');
-
-      // タイトル・ハード・発売日
       var elTitle = document.getElementById('detailTitle');
       if (elTitle) elTitle.textContent = game.title || '無題';
 
       var elBadge = document.getElementById('detailBadgeHard');
       if (elBadge) elBadge.textContent = game.platform || 'GAME';
+
+      updateDetailStatusBadge(u.status);
 
       var elCompBadge = document.getElementById('detailCompleteBadge');
       if (elCompBadge) elCompBadge.classList.toggle('hidden', !u.complete);
@@ -1586,7 +1734,6 @@
       var elRelease = document.getElementById('detailReleaseDate');
       if (elRelease) elRelease.textContent = game.release_date ? (game.release_date + ' 発売') : '発売日未定';
 
-      // スペック
       var elPlatform = document.getElementById('detailPlatform');
       if (elPlatform) elPlatform.textContent = game.platform || '不明';
 
@@ -1596,7 +1743,6 @@
       var elGen = document.getElementById('detailGenre');
       if (elGen) elGen.textContent = game.genre || 'ゲーム';
 
-      // 記念日リンク
       var elSameDate = document.getElementById('detailSameDateGames');
       if (elSameDate) {
         var md = getMonthDayString(game.release_date);
@@ -1612,7 +1758,6 @@
         }
       }
 
-      // サムネイル枠
       var inputCover = document.getElementById('detailThumbnailInput');
       var previewImg = document.getElementById('detailThumbnailImg');
       var emptyBox = document.getElementById('detailThumbnailEmpty');
@@ -1634,7 +1779,6 @@
         if (urlLink) urlLink.classList.add('hidden');
       }
 
-      // ヘッダー背景画像
       var coverLayer = document.getElementById('detailCoverImageLayer');
       if (coverLayer) {
         if (coverUrl && isValidHttpUrl(coverUrl)) {
@@ -1646,18 +1790,17 @@
         }
       }
 
-      // このゲームのつぶやき一覧を描画
       var quickPostInput = document.getElementById('detailQuickPostInput');
       if (quickPostInput) quickPostInput.value = '';
       renderDetailGamePosts();
 
-      // トグル状態の同期
       updateDetailCollectButtons(u.status);
+      updateDetailRating(u.rating || 0);
+
       updateDetailAccessoryButtons(u);
       updateDetailMaintenanceButtons(u);
       updateDetailRankButtons(u.rank);
 
-      // バージョンメモ・資産フィールド
       var memoInput = document.getElementById('detailVersionMemoInput');
       if (memoInput) memoInput.value = u.version_memo || '';
 
@@ -1676,7 +1819,6 @@
       var dupLabel = document.getElementById('detailDuplicateCountLabel');
       if (dupLabel) dupLabel.textContent = u.duplicate_count || 1;
 
-      // 外部参照ボタンリンク
       var encTitle = encodeURIComponent(game.title || '');
       var wikiBtn = document.getElementById('detailWikiBtn');
       if (wikiBtn) wikiBtn.href = 'https://ja.wikipedia.org/wiki/' + encTitle;
@@ -1707,37 +1849,92 @@
       }
     }
 
-    // 収集ステータス変更（所持 / ほしい / プレイ中）
     function setDetailCollectStatus(newStatus) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
       if (!userStates[k]) userStates[k] = getUserState(currentDetailGame);
 
       userStates[k].status = newStatus;
-      userStates[k].owned = (newStatus === 'owned');
+      userStates[k].owned = (newStatus === 'owned' || newStatus === 'cleared');
       saveUserStates();
       detailModalDirty = true;
       updateSingleCardDom(currentDetailGame.id);
 
       updateDetailCollectButtons(newStatus);
-      showToast('収集ステータスを更新しました', 'info');
+      updateDetailStatusBadge(newStatus);
+      showToast('ステータスを更新しました', 'info');
+    }
+
+    function updateDetailStatusBadge(status) {
+      var badge = document.getElementById('detailStatusBadge');
+      if (!badge) return;
+      var map = {
+        'owned': { text: '📦 所持', class: 'bg-emerald-600 text-white' },
+        'cleared': { text: '🏆 クリア済', class: 'bg-amber-400 text-slate-950 font-black' },
+        'playing': { text: '🎮 プレイ中', class: 'bg-purple-600 text-white' },
+        'wanted': { text: '⭐ ほしい', class: 'bg-sky-500 text-white' },
+        'unowned': { text: '未所持', class: 'bg-slate-700 text-slate-300' }
+      };
+      var info = map[status] || map['unowned'];
+      badge.textContent = info.text;
+      badge.className = 'px-2 py-0.5 rounded text-[11px] font-black shadow ' + info.class;
     }
 
     function updateDetailCollectButtons(activeStatus) {
-      var list = ['owned', 'wanted', 'playing'];
+      var list = ['owned', 'cleared', 'playing', 'wanted', 'unowned'];
+      var activeStyles = {
+        'owned': 'bg-emerald-600 text-white border-emerald-600 shadow-sm',
+        'cleared': 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm font-black',
+        'playing': 'bg-purple-600 text-white border-purple-600 shadow-sm',
+        'wanted': 'bg-sky-500 text-white border-sky-500 shadow-sm',
+        'unowned': 'bg-slate-700 text-white border-slate-700 shadow-sm'
+      };
+
       list.forEach(function(st) {
         var btn = document.getElementById('btnDetailCollect_' + st);
         if (btn) {
           if (st === activeStatus) {
-            btn.className = 'py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 bg-emerald-600 text-white border-emerald-600 shadow-sm';
+            btn.className = 'py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 ' + activeStyles[st];
           } else {
-            btn.className = 'py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+            btn.className = 'py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
           }
         }
       });
     }
 
-    // 付属品トグル
+    function setDetailRating(val) {
+      if (!currentDetailGame) return;
+      var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
+      if (!userStates[k]) userStates[k] = getUserState(currentDetailGame);
+
+      userStates[k].rating = val;
+      saveUserStates();
+      detailModalDirty = true;
+      updateDetailRating(val);
+      showToast(val > 0 ? ('面白さを ★' + val + ' に設定しました') : '評価をリセットしました', 'info');
+    }
+
+    function updateDetailRating(rating) {
+      var starsContainer = document.getElementById('detailRatingStars');
+      var label = document.getElementById('detailRatingText');
+      if (!starsContainer) return;
+
+      var labels = ['未評価', '★1 (いまいち)', '★2 (まあまあ)', '★3 (普通・良作)', '★4 (かなり面白い)', '★5 (神ゲー・傑作)'];
+      if (label) {
+        label.textContent = labels[rating] || '未評価';
+        label.className = rating > 0 ? 'text-[11px] font-black text-amber-500' : 'text-[11px] font-bold text-slate-400';
+      }
+
+      var html = '';
+      for (var i = 1; i <= 5; i++) {
+        var isFilled = (i <= rating);
+        html += '<span onclick="setDetailRating(' + i + ')" class="transition-transform hover:scale-125 ' + 
+          (isFilled ? 'text-amber-400' : 'text-slate-200 hover:text-amber-200') + 
+          '">★</span>';
+      }
+      starsContainer.innerHTML = html;
+    }
+
     function toggleDetailAccessory(type) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
@@ -1745,7 +1942,6 @@
 
       userStates[k][type] = !userStates[k][type];
 
-      // 完品判定の自動同期（5点すべて揃うと自動で完品）
       var isComp = Boolean(userStates[k].box && userStates[k].manual && userStates[k].postcard && userStates[k].obi && userStates[k].bonus);
       userStates[k].complete = isComp;
 
@@ -1791,7 +1987,6 @@
       }
     }
 
-    // メンテナンス状態トグル
     function toggleDetailMaintenance(type) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
@@ -1819,7 +2014,6 @@
       });
     }
 
-    // 状態ランク設定
     function setDetailConditionRank(rank) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
@@ -1847,7 +2041,6 @@
       });
     }
 
-    // バージョンメモ保存
     function saveDetailVersionMemo(val) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
@@ -1856,7 +2049,6 @@
       saveUserStates();
     }
 
-    // 資産情報（価格・日付・店舗・保管場所）保存
     function saveDetailAssetField(field, val) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
@@ -1871,7 +2063,6 @@
       detailModalDirty = true;
     }
 
-    // ダブり数カウンター
     function adjustDuplicateCount(delta) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
@@ -1888,7 +2079,6 @@
       if (label) label.textContent = next;
     }
 
-    // サムネイル画像URLの直接編集ハンドラー
     function handleDetailCoverUrlInput(url) {
       if (!currentDetailGame) return;
       var cleanUrl = (url || '').trim();
@@ -1927,11 +2117,9 @@
       updateSingleCardDom(currentDetailGame.id);
     }
 
-    // 詳細モーダル内：このゲームのつぶやきレンダリング
     function renderDetailGamePosts() {
       var container = document.getElementById('detailPostListContainer');
       var badge = document.getElementById('detailPostCountBadge');
-      var tabBadge = document.getElementById('detailTabPostBadge');
       if (!container || !currentDetailGame) return;
 
       var matched = playPosts.filter(function(p) {
@@ -1940,7 +2128,6 @@
       });
 
       if (badge) badge.textContent = matched.length + '件';
-      if (tabBadge) tabBadge.textContent = matched.length;
 
       if (matched.length === 0) {
         container.innerHTML = '<div class="p-3 text-center text-slate-400 text-[11px] bg-slate-50 rounded-xl border border-dashed border-slate-200">まだこのゲームのつぶやきはありません。上部のフォームから投稿できます。</div>';
@@ -1962,7 +2149,6 @@
       }).join('');
     }
 
-    // 詳細モーダル内：クイックつぶやき投稿
     function handleDetailQuickPostSubmit() {
       if (!currentDetailGame) return;
       var input = document.getElementById('detailQuickPostInput');
@@ -1989,7 +2175,6 @@
       showToast('つぶやきを記録しました', 'success');
     }
 
-    // 詳細モーダル内：つぶやき削除
     function deleteDetailGamePost(postId) {
       playPosts = playPosts.filter(function(p) { return p.id !== postId; });
       savePlayPosts();
@@ -1998,29 +2183,6 @@
       showToast('投稿を削除しました', 'info');
     }
 
-    // 詳細モーダル内のタブ切り替え（メイン / つぶやき / 詳細・リンク）
-    function switchDetailTab(tab) {
-      var pMain = document.getElementById('detailTabPane_main');
-      var pPosts = document.getElementById('detailTabPane_posts');
-      var pInfo = document.getElementById('detailTabPane_info');
-
-      var bMain = document.getElementById('btnDetailTab_main');
-      var bPosts = document.getElementById('btnDetailTab_posts');
-      var bInfo = document.getElementById('btnDetailTab_info');
-
-      var activeClass = 'pb-2.5 px-3 border-b-2 border-emerald-600 text-emerald-600 flex items-center gap-1.5 transition font-black';
-      var inactiveClass = 'pb-2.5 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition font-bold';
-
-      if (pMain) pMain.classList.toggle('hidden', tab !== 'main');
-      if (pPosts) pPosts.classList.toggle('hidden', tab !== 'posts');
-      if (pInfo) pInfo.classList.toggle('hidden', tab !== 'info');
-
-      if (bMain) bMain.className = (tab === 'main') ? activeClass : inactiveClass;
-      if (bPosts) bPosts.className = (tab === 'posts') ? activeClass : inactiveClass;
-      if (bInfo) bInfo.className = (tab === 'info') ? activeClass : inactiveClass;
-    }
-
-    // 背面カードDOMのみピンポイント更新（全体再描画によるラグ防止）
     function updateSingleCardDom(gameId) {
       var card = document.getElementById('gameCard_' + gameId);
       if (!card || !currentDetailGame) return;
@@ -2036,7 +2198,6 @@
         card.classList.add('border-slate-200');
       }
 
-      // サムネイル画像も差し替え
       var img = card.querySelector('img');
       var coverUrl = (u.cover_url || currentDetailGame.cover_url || '').trim();
       if (img && coverUrl && isValidHttpUrl(coverUrl)) {
@@ -2044,13 +2205,9 @@
       }
     }
 
-    // ==========================================
-    // 達成率モーダル（2階層ナビゲーション ＆ モチベーション向上機能）
-    // ==========================================
-    var currentProgressLevel = 1; // 1: カテゴリ選択, 2: 達成率一覧
-    var currentProgressCategory = null; // 'platform' | 'genre' | 'publisher'
+    var currentProgressLevel = 1;
+    var currentProgressCategory = null;
 
-    // コレクター称号・トロフィー判定
     function getCollectorRank(rate, isCompleteAll) {
       if (isCompleteAll || rate >= 100) {
         return { rank: 'LEGEND', label: '🏆 完全制覇 (LEGEND)', color: 'text-amber-500 bg-amber-50 border-amber-300', icon: '🏆', celebrate: true };
@@ -2078,7 +2235,6 @@
       if (modal) modal.classList.add('hidden');
     }
 
-    // 【一階層目】ハード別・ジャンル別・メーカー別の3カテゴリ選択画面
     function showProgressTopLevel() {
       currentProgressLevel = 1;
       currentProgressCategory = null;
@@ -2104,7 +2260,6 @@
       var totalComplete = 0;
       var perfectCategoriesCount = 0;
 
-      // カテゴリごとの簡易集計
       var platformCounts = {};
       var genreCounts = {};
       var publisherCounts = {};
@@ -2134,7 +2289,6 @@
         if (isOwn) publisherCounts[pub].owned++;
       }
 
-      // 完全制覇しているハードがあるかチェック
       Object.keys(platformCounts).forEach(function(k) {
         if (platformCounts[k].total > 0 && platformCounts[k].owned === platformCounts[k].total) perfectCategoriesCount++;
       });
@@ -2143,7 +2297,6 @@
       var overallRank = getCollectorRank(parseFloat(overallRate), false);
 
       body.innerHTML = 
-        // 総合コレクターランクバナー（モチベーション向上）
         '<div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-md flex items-center justify-between gap-3 border border-slate-700">' +
           '<div class="space-y-1">' +
             '<div class="flex items-center gap-2">' +
@@ -2164,10 +2317,7 @@
           '</div>' +
         '</div>' +
 
-        // 3カテゴリ選択カードグリッド
         '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">' +
-          
-          // ① ハード別
           '<div onclick="showProgressDetail(\'platform\')" class="group p-4 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-emerald-500 rounded-2xl shadow-sm hover:shadow transition cursor-pointer flex flex-col justify-between space-y-3">' +
             '<div class="flex items-center justify-between">' +
               '<span class="text-2xl p-2 rounded-xl bg-emerald-50 text-emerald-600">🎮</span>' +
@@ -2183,7 +2333,6 @@
             '</div>' +
           '</div>' +
 
-          // ② ジャンル別
           '<div onclick="showProgressDetail(\'genre\')" class="group p-4 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-sky-500 rounded-2xl shadow-sm hover:shadow transition cursor-pointer flex flex-col justify-between space-y-3">' +
             '<div class="flex items-center justify-between">' +
               '<span class="text-2xl p-2 rounded-xl bg-sky-50 text-sky-600">🏷️</span>' +
@@ -2199,7 +2348,6 @@
             '</div>' +
           '</div>' +
 
-          // ③ メーカー別
           '<div onclick="showProgressDetail(\'publisher\')" class="group p-4 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-purple-500 rounded-2xl shadow-sm hover:shadow transition cursor-pointer flex flex-col justify-between space-y-3">' +
             '<div class="flex items-center justify-between">' +
               '<span class="text-2xl p-2 rounded-xl bg-purple-50 text-purple-600">🏢</span>' +
@@ -2214,11 +2362,9 @@
               '<span class="text-purple-600">' + Object.keys(publisherCounts).length + ' 社</span>' +
             '</div>' +
           '</div>' +
-
         '</div>';
     }
 
-    // 【二階層目】選択カテゴリに応じた詳細進捗＆モチベーション表示
     function showProgressDetail(category) {
       currentProgressLevel = 2;
       currentProgressCategory = category;
@@ -2240,7 +2386,6 @@
         if (subEl) subEl.textContent = '任天堂、スクウェア、エニックスなど企業別の所持率・完品率';
       }
 
-      // 該当カテゴリごとに集計
       var groups = {};
       for (var i = 0; i < catalog.length; i++) {
         var g = catalog[i];
@@ -2259,25 +2404,14 @@
         }
       }
 
-      // ソート: 達成率の高い順（同率なら分母の大きい順）
       var list = Object.keys(groups).map(function(k) { return groups[k]; });
       
-      // メーカー別・ジャンル別は母数が少なすぎるノイズを整理（メーカーは5本以上など優先表示、あるいは総数順）
-      if (category === 'publisher') {
-        list.sort(function(a, b) {
-          var rateA = a.total > 0 ? (a.owned / a.total) : 0;
-          var rateB = b.total > 0 ? (b.owned / b.total) : 0;
-          if (rateB !== rateA) return rateB - rateA;
-          return b.total - a.total;
-        });
-      } else {
-        list.sort(function(a, b) {
-          var rateA = a.total > 0 ? (a.owned / a.total) : 0;
-          var rateB = b.total > 0 ? (b.owned / b.total) : 0;
-          if (rateB !== rateA) return rateB - rateA;
-          return b.total - a.total;
-        });
-      }
+      list.sort(function(a, b) {
+        var rateA = a.total > 0 ? (a.owned / a.total) : 0;
+        var rateB = b.total > 0 ? (b.owned / b.total) : 0;
+        if (rateB !== rateA) return rateB - rateA;
+        return b.total - a.total;
+      });
 
       var body = document.getElementById('progressModalBody') || document.getElementById('progressListContainer');
       if (!body) return;
@@ -2290,7 +2424,6 @@
         var remain = Math.max(0, item.total - item.owned);
         var rankInfo = getCollectorRank(pct, item.total > 0 && remain === 0);
 
-        // コンプリート演出枠
         var isPerfect = (item.total > 0 && remain === 0);
         var cardBorder = isPerfect ? 'border-2 border-amber-400 bg-amber-50/40 shadow' : 'border border-slate-200 bg-white';
         var progressGradient = isPerfect ? 'bg-gradient-to-r from-amber-400 to-yellow-300 animate-pulse' :
@@ -2298,8 +2431,6 @@
                               (pct >= 50) ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-emerald-500';
 
         html += '<div class="' + cardBorder + ' p-3.5 rounded-2xl transition space-y-2.5">' +
-          
-          // 上段：名称 ＆ 称号バッジ ＆ 達成率
           '<div class="flex items-center justify-between flex-wrap gap-1">' +
             '<div class="flex items-center gap-2 min-w-0">' +
               '<span class="px-2 py-0.5 rounded text-[11px] font-black ' + (isPerfect ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-900 text-white') + ' flex-shrink-0">' + 
@@ -2313,12 +2444,10 @@
             '</div>' +
           '</div>' +
 
-          // 中段：プログレスバー（ダブルレイヤー）
           '<div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-200/60">' +
             '<div class="' + progressGradient + ' h-full rounded-full transition-all duration-700" style="width: ' + pct + '%"></div>' +
           '</div>' +
 
-          // 下段：完品状況 ＆ 残りカウントダウン ＆ アクション
           '<div class="flex items-center justify-between text-[11px] pt-0.5 flex-wrap gap-2">' +
             '<div class="flex items-center gap-3 text-slate-500">' +
               '<span>👑 箱説完品: <strong class="text-amber-600 font-bold">' + item.complete + '本</strong> (' + compPct + '%)</span>' +
@@ -2334,7 +2463,6 @@
               ) +
             '</div>' +
           '</div>' +
-
         '</div>';
       });
 
@@ -2342,12 +2470,9 @@
       body.innerHTML = html;
     }
 
-    // 達成率画面からワンタップで「そのカテゴリの未所持ソフト」をカタログで絞り込む
     function filterUnownedFromProgress(category, value) {
       closeProgressModal();
       switchNavTab('catalog');
-
-      // 共通リセット
       resetAllFilters();
 
       if (category === 'platform') {
@@ -2357,12 +2482,10 @@
         if (searchInput) searchInput.value = value;
       }
 
-      // 未所持ステータスを選択して即座に表示
       setCollectionStatusFilter('unowned');
       showToast('「' + value + '」の未所持タイトルを絞り込みました', 'info');
     }
 
-    // プレイポスト（つぶやき）
     function searchPostGames(query) {
       var box = document.getElementById('postGameSuggestBox');
       if (!box) return;
@@ -2491,7 +2614,6 @@
       }).join('');
     }
 
-    // カレンダー
     function resetCalendarToToday() {
       var now = new Date();
       calendarYear = now.getFullYear();
@@ -2564,7 +2686,6 @@
       grid.innerHTML = html;
     }
 
-    // ニュースフィード
     var currentNewsSource = 'denfaminicogamer';
     function switchNewsSource(source) {
       currentNewsSource = source;
@@ -2628,7 +2749,6 @@
         });
     }
 
-    // ナビゲーション切り替え
     function switchNavTab(tab) {
       var sCat = document.getElementById('sectionCatalog');
       var sPosts = document.getElementById('sectionPosts');
@@ -2657,7 +2777,6 @@
       if (tab === 'news') fetchNewsFeed(false);
     }
 
-    // CSV取り込み
     function openCsvImportModal() {
       var m = document.getElementById('csvModal');
       if (m) m.classList.remove('hidden');
@@ -2716,7 +2835,6 @@
       reader.readAsText(input.files[0], 'utf-8');
     }
 
-    // データJSONバックアップ
     function exportDataBackup() {
       var data = {
         app: 'RETROVAULT_COLLECTOR',
@@ -2735,10 +2853,10 @@
       showToast('データバックアップを保存しました', 'info');
     }
 
-    // サマリーストリップ更新
     function updateDashboardSummary() {
       var totalCatalog = catalog.length;
       var ownedCount = 0;
+      var clearedCount = 0;
       var completeCount = 0;
       var wantedCount = 0;
       var playingCount = 0;
@@ -2746,7 +2864,10 @@
       var keys = Object.keys(userStates);
       for (var i = 0; i < keys.length; i++) {
         var u = userStates[keys[i]];
-        if (u.status === 'owned' || (Boolean(u.owned) && u.status !== 'unowned')) {
+        if (u.status === 'cleared') {
+          clearedCount++;
+        }
+        if (u.status === 'owned' || u.status === 'cleared') {
           ownedCount++;
           if (u.box && u.manual && u.postcard && u.obi && u.bonus) completeCount++;
         } else if (u.status === 'wanted') {
@@ -2773,21 +2894,21 @@
       var elRate = document.getElementById('sumCollectRate');
       if (elRate) elRate.textContent = rate + '%';
 
-      // フィルターバッジ件数
       var bOwned = document.getElementById('badgeStat_owned');
+      var bCleared = document.getElementById('badgeStat_cleared');
       var bAll = document.getElementById('badgeStat_all');
       var bWanted = document.getElementById('badgeStat_wanted');
       var bPlaying = document.getElementById('badgeStat_playing');
       var bUnowned = document.getElementById('badgeStat_unowned');
 
       if (bOwned) bOwned.textContent = ownedCount;
+      if (bCleared) bCleared.textContent = clearedCount;
       if (bAll) bAll.textContent = totalCatalog;
       if (bWanted) bWanted.textContent = wantedCount;
       if (bPlaying) bPlaying.textContent = playingCount;
       if (bUnowned) bUnowned.textContent = Math.max(0, totalCatalog - ownedCount);
     }
 
-    // トースト通知
     function showToast(msg, type) {
       var toast = document.getElementById('toast');
       var text = document.getElementById('toastMsg');
@@ -2806,18 +2927,17 @@
       }, 2600);
     }
 
-    // アプリ起動
     document.addEventListener('DOMContentLoaded', function() {
       loadSavedStates();
       setViewMode(currentViewMode);
       setCollectionStatusFilter(currentCollectFilter);
       if (catalog.length > 0) {
         updatePlatformSidebarPills(catalog);
+        updateGenreSidebarPills(catalog); // ★ 初回ジャンルタグ生成
         applyFilters();
       }
       renderPlayPosts();
 
-      // バックグラウンドで最新マスターと同期
       syncMasterCsv(true);
     });
   </script>
