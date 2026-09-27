@@ -138,8 +138,12 @@
           <span class="font-black text-emerald-400 text-xs sm:text-sm" id="sumOwnedCount">0</span>
         </div>
         <div class="flex items-center gap-1">
+          <span class="text-slate-400 text-[10px]">🏆 クリア済:</span>
+          <span class="font-black text-amber-300 text-xs sm:text-sm" id="sumClearedCount">0</span>
+        </div>
+        <div class="flex items-center gap-1">
           <span class="text-slate-400 text-[10px]">👑 完品:</span>
-          <span class="font-black text-amber-300 text-xs sm:text-sm" id="sumCompleteCount">0</span>
+          <span class="font-black text-amber-400 text-xs sm:text-sm" id="sumCompleteCount">0</span>
         </div>
         <div class="flex items-center gap-1">
           <span class="text-slate-400 text-[10px]">ほしい:</span>
@@ -198,7 +202,7 @@
         </div>
       </div>
 
-      <!-- 絞り込みフィルターパネル（デフォルト展開・4カラム構成） -->
+      <!-- 絞り込みフィルターパネル（所持 ＆ 攻略ステータスを完全分離） -->
       <aside id="filterSidebar" class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4 w-full transition-all duration-200">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
@@ -212,34 +216,53 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- ① ステータス -->
-          <div class="space-y-1.5">
-            <div class="text-[11px] font-bold text-slate-400">ステータス</div>
-            <div class="grid grid-cols-2 gap-1.5 text-xs">
-              <button type="button" onclick="setCollectionStatusFilter('owned')" id="btnStatFilter_owned" class="py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between">
-                <span>所持のみ</span>
-                <span id="badgeStat_owned" class="text-[10px] opacity-80">0</span>
-              </button>
-              <button type="button" onclick="setCollectionStatusFilter('cleared')" id="btnStatFilter_cleared" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
-                <span>クリア済み</span>
-                <span id="badgeStat_cleared" class="text-[10px] text-slate-400">0</span>
-              </button>
-              <button type="button" onclick="setCollectionStatusFilter('wanted')" id="btnStatFilter_wanted" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
-                <span>ほしい</span>
-                <span id="badgeStat_wanted" class="text-[10px] text-slate-400">0</span>
-              </button>
-              <button type="button" onclick="setCollectionStatusFilter('playing')" id="btnStatFilter_playing" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
-                <span>プレイ中</span>
-                <span id="badgeStat_playing" class="text-[10px] text-slate-400">0</span>
-              </button>
-              <button type="button" onclick="setCollectionStatusFilter('unowned')" id="btnStatFilter_unowned" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left col-span-2 flex items-center justify-between">
-                <span>未所持タイトル</span>
-                <span id="badgeStat_unowned" class="text-[10px] text-slate-400">0</span>
-              </button>
-              <button type="button" onclick="setCollectionStatusFilter('all')" id="btnStatFilter_all" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left col-span-2 flex items-center justify-between">
-                <span>全タイトル</span>
-                <span id="badgeStat_all" class="text-[10px] text-slate-400">0</span>
-              </button>
+          
+          <!-- ① 所持ステータス ＆ 攻略ステータス -->
+          <div class="space-y-3">
+            <div class="space-y-1.5">
+              <div class="text-[11px] font-bold text-slate-400 flex items-center justify-between">
+                <span>所持ステータス</span>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5 text-xs">
+                <button type="button" onclick="setHoldFilter('owned')" id="btnHold_owned" class="py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between">
+                  <span>所持のみ</span>
+                  <span id="badgeHold_owned" class="text-[10px] opacity-80">0</span>
+                </button>
+                <button type="button" onclick="setHoldFilter('all')" id="btnHold_all" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                  <span>全タイトル</span>
+                  <span id="badgeHold_all" class="text-[10px] text-slate-400">0</span>
+                </button>
+                <button type="button" onclick="setHoldFilter('wanted')" id="btnHold_wanted" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                  <span>ほしい</span>
+                  <span id="badgeHold_wanted" class="text-[10px] text-slate-400">0</span>
+                </button>
+                <button type="button" onclick="setHoldFilter('unowned')" id="btnHold_unowned" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                  <span>未所持のみ</span>
+                  <span id="badgeHold_unowned" class="text-[10px] text-slate-400">0</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1.5 pt-1 border-t border-slate-100">
+              <div class="text-[11px] font-bold text-slate-400">攻略ステータス</div>
+              <div class="grid grid-cols-2 gap-1.5 text-xs">
+                <button type="button" onclick="setPlayFilter('ALL')" id="btnPlay_ALL" class="py-1.5 px-2 rounded-lg font-bold bg-slate-800 text-white shadow-sm transition text-left flex items-center justify-between">
+                  <span>全件</span>
+                  <span id="badgePlay_ALL" class="text-[10px] opacity-80">0</span>
+                </button>
+                <button type="button" onclick="setPlayFilter('cleared')" id="btnPlay_cleared" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                  <span>🏆 クリア済</span>
+                  <span id="badgePlay_cleared" class="text-[10px] text-slate-400">0</span>
+                </button>
+                <button type="button" onclick="setPlayFilter('playing')" id="btnPlay_playing" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                  <span>🎮 プレイ中</span>
+                  <span id="badgePlay_playing" class="text-[10px] text-slate-400">0</span>
+                </button>
+                <button type="button" onclick="setPlayFilter('none')" id="btnPlay_none" class="py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between">
+                  <span>未プレイ</span>
+                  <span id="badgePlay_none" class="text-[10px] text-slate-400">0</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -303,7 +326,7 @@
             <div id="sidebarPlatformPills" class="flex flex-wrap gap-1 max-h-48 overflow-y-auto pr-1"></div>
           </div>
 
-          <!-- ④ ★ ジャンル別クイック選択 -->
+          <!-- ④ ジャンル別クイック選択 -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-bold text-slate-400">ジャンル</span>
@@ -450,11 +473,12 @@
           ✕
         </button>
 
-        <div class="relative z-10 flex flex-wrap items-center gap-2 mb-1.5">
+        <div class="relative z-10 flex flex-wrap items-center gap-1.5 mb-1.5">
           <span id="detailBadgeHard" class="px-2 py-0.5 rounded text-[11px] font-black bg-amber-400 text-slate-950 shadow">--</span>
-          <span id="detailStatusBadge" class="px-2 py-0.5 rounded text-[11px] font-black bg-slate-700 text-slate-300 shadow">未所持</span>
+          <span id="detailHoldBadge" class="px-2 py-0.5 rounded text-[11px] font-black bg-slate-700 text-slate-300 shadow">未所持</span>
+          <span id="detailPlayBadge" class="hidden px-2 py-0.5 rounded text-[11px] font-black bg-amber-500 text-slate-950 shadow">🏆 クリア済</span>
           <span id="detailCompleteBadge" class="hidden px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500 text-white shadow">👑 箱説完品</span>
-          <span id="detailReleaseDate" class="text-xs text-slate-300 font-medium">--</span>
+          <span id="detailReleaseDate" class="text-xs text-slate-300 font-medium ml-1">--</span>
         </div>
         <h3 id="detailTitle" class="relative z-10 text-xl sm:text-2xl font-black leading-tight drop-shadow-md text-white">--</h3>
       </div>
@@ -462,26 +486,34 @@
       <!-- モーダル本文 -->
       <div class="p-5 overflow-y-auto space-y-4 flex-1 bg-slate-50/70 text-xs">
         
-        <!-- ステータストグル -->
+        <!-- 所持ステータストグル -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div class="text-[11px] font-bold text-slate-400">ステータス</div>
+          <div class="text-[11px] font-bold text-slate-400">所持ステータス (手元にあるか)</div>
           <div class="grid grid-cols-3 gap-1.5">
-            <button type="button" onclick="setDetailCollectStatus('owned')" id="btnDetailCollect_owned" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+            <button type="button" onclick="setDetailHoldStatus('owned')" id="btnDetailHold_owned" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
               <span>📦 所持</span>
             </button>
-            <button type="button" onclick="setDetailCollectStatus('cleared')" id="btnDetailCollect_cleared" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>🏆 クリア済</span>
-            </button>
-            <button type="button" onclick="setDetailCollectStatus('playing')" id="btnDetailCollect_playing" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>🎮 プレイ中</span>
-            </button>
-          </div>
-          <div class="grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="setDetailCollectStatus('wanted')" id="btnDetailCollect_wanted" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+            <button type="button" onclick="setDetailHoldStatus('wanted')" id="btnDetailHold_wanted" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
               <span>⭐ ほしい</span>
             </button>
-            <button type="button" onclick="setDetailCollectStatus('unowned')" id="btnDetailCollect_unowned" class="py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+            <button type="button" onclick="setDetailHoldStatus('unowned')" id="btnDetailHold_unowned" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
               <span>✕ 未所持</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 攻略ステータストグル -->
+        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="text-[11px] font-bold text-slate-400">攻略ステータス (遊んだことがあるか)</div>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" onclick="setDetailPlayStatus('cleared')" id="btnDetailPlay_cleared" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+              <span>🏆 クリア済</span>
+            </button>
+            <button type="button" onclick="setDetailPlayStatus('playing')" id="btnDetailPlay_playing" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+              <span>🎮 プレイ中</span>
+            </button>
+            <button type="button" onclick="setDetailPlayStatus('none')" id="btnDetailPlay_none" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+              <span>未プレイ</span>
             </button>
           </div>
         </div>
@@ -749,9 +781,11 @@
     var catalog = [];
     var userStates = {};
     var playPosts = [];
-    var currentCollectFilter = 'owned';
+    
+    var currentHoldFilter = 'owned';
+    var currentPlayFilter = 'ALL';
     var currentPlatformFilter = 'ALL';
-    var currentGenreFilter = 'ALL'; // ★ ジャンルフィルター状態
+    var currentGenreFilter = 'ALL';
     var currentRankFilter = 'ALL';
     var currentRatingFilter = 0;
     var currentSort = 'release_asc';
@@ -870,12 +904,29 @@
       var key = makeStateKey(game.title, game.platform);
       var state = userStates[key];
       if (state) {
-        var st = state.status || 'unowned';
-        var isOwned = (st === 'owned' || st === 'cleared');
+        var hold = state.hold_status;
+        var play = state.play_status;
+
+        if (!hold) {
+          if (state.status === 'owned') hold = 'owned';
+          else if (state.status === 'wanted') hold = 'wanted';
+          else if (state.status === 'cleared') hold = state.owned ? 'owned' : 'unowned';
+          else if (state.status === 'playing') hold = state.owned ? 'owned' : 'unowned';
+          else hold = state.owned ? 'owned' : 'unowned';
+        }
+
+        if (!play) {
+          if (state.status === 'cleared') play = 'cleared';
+          else if (state.status === 'playing') play = 'playing';
+          else play = 'none';
+        }
+
+        var isOwned = (hold === 'owned');
         var isComp = isOwned && Boolean(state.box && state.manual && state.postcard && state.obi && state.bonus);
 
         return {
-          status: st,
+          hold_status: hold,
+          play_status: play,
           owned: isOwned,
           box: Boolean(state.box),
           manual: Boolean(state.manual),
@@ -900,7 +951,8 @@
         };
       }
       return {
-        status: 'unowned',
+        hold_status: 'unowned',
+        play_status: 'none',
         owned: false,
         box: false,
         manual: false,
@@ -923,43 +975,6 @@
         memo: '',
         cover_url: game.cover_url || ''
       };
-    }
-
-    function getMergedCatalog() {
-      return catalog.map(function(g) {
-        var u = getUserState(g);
-        return {
-          id: g.id,
-          title: g.title,
-          platform: g.platform,
-          publisher: g.publisher,
-          genre: g.genre,
-          release_date: g.release_date,
-          cover_url: u.cover_url || g.cover_url || '',
-          _searchIndex: g._searchIndex,
-          status: u.status,
-          owned: u.owned,
-          box: u.box,
-          manual: u.manual,
-          postcard: u.postcard,
-          obi: u.obi,
-          bonus: u.bonus,
-          complete: u.complete,
-          cleaned: u.cleaned,
-          battery: u.battery,
-          tested: u.tested,
-          sealed: u.sealed,
-          rank: u.rank,
-          rating: u.rating,
-          version_memo: u.version_memo,
-          price: u.price,
-          date: u.date,
-          shop: u.shop,
-          location: u.location,
-          duplicate_count: u.duplicate_count,
-          memo: u.memo
-        };
-      });
     }
 
     function loginWithGoogle() {
@@ -1229,7 +1244,7 @@
           if (text) text.textContent = 'マスター同期完了 (全 ' + catalog.length + ' 本)';
 
           updatePlatformSidebarPills(catalog);
-          updateGenreSidebarPills(catalog); // ★ ジャンルタグ生成
+          updateGenreSidebarPills(catalog);
           applyFilters();
           renderCalendar();
           if (!isSilent) showToast('スプレッドシートマスターを最新化しました', 'success');
@@ -1274,16 +1289,30 @@
       }
     }
 
-    function setCollectionStatusFilter(status) {
-      currentCollectFilter = status;
-      var buttons = ['owned', 'cleared', 'wanted', 'playing', 'unowned', 'all'];
-      buttons.forEach(function(st) {
-        var el = document.getElementById('btnStatFilter_' + st);
+    function setHoldFilter(status) {
+      currentHoldFilter = status;
+      ['owned', 'all', 'wanted', 'unowned'].forEach(function(st) {
+        var el = document.getElementById('btnHold_' + st);
         if (el) {
           if (st === status) {
-            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between ' + (st === 'unowned' || st === 'all' ? 'col-span-2' : '');
+            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-emerald-600 text-white shadow-sm transition text-left flex items-center justify-between';
           } else {
-            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between ' + (st === 'unowned' || st === 'all' ? 'col-span-2' : '');
+            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between';
+          }
+        }
+      });
+      applyFilters();
+    }
+
+    function setPlayFilter(status) {
+      currentPlayFilter = status;
+      ['ALL', 'cleared', 'playing', 'none'].forEach(function(st) {
+        var el = document.getElementById('btnPlay_' + st);
+        if (el) {
+          if (st === status) {
+            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-slate-800 text-white shadow-sm transition text-left flex items-center justify-between';
+          } else {
+            el.className = 'py-1.5 px-2 rounded-lg font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-left flex items-center justify-between';
           }
         }
       });
@@ -1314,9 +1343,10 @@
     }
 
     function resetAllFilters() {
-      currentCollectFilter = 'owned';
+      currentHoldFilter = 'owned';
+      currentPlayFilter = 'ALL';
       currentPlatformFilter = 'ALL';
-      currentGenreFilter = 'ALL'; // ★ ジャンルリセット
+      currentGenreFilter = 'ALL';
       currentRankFilter = 'ALL';
       currentRatingFilter = 0;
       currentAnniversaryFilter = null;
@@ -1344,7 +1374,8 @@
       updatePlatformSidebarPills(catalog);
       updateGenreSidebarPills(catalog);
 
-      setCollectionStatusFilter('owned');
+      setHoldFilter('owned');
+      setPlayFilter('ALL');
       setRankFilter('ALL');
       setRatingFilter(0);
       applyFilters();
@@ -1391,8 +1422,10 @@
 
       currentAnniversaryFilter = mmdd;
 
-      currentCollectFilter = 'all';
-      setCollectionStatusFilter('all');
+      currentHoldFilter = 'all';
+      currentPlayFilter = 'ALL';
+      setHoldFilter('all');
+      setPlayFilter('ALL');
       
       var banner = document.getElementById('anniversaryFilterBanner');
       var text = document.getElementById('anniversaryFilterText');
@@ -1437,7 +1470,6 @@
       applyFilters();
     }
 
-    // ★ ジャンルタグの動的生成
     function updateGenreSidebarPills(list) {
       var counts = {};
       list.forEach(function(g) {
@@ -1463,7 +1495,6 @@
       container.innerHTML = html;
     }
 
-    // ★ ジャンル切り替え
     function setQuickGenre(genre) {
       currentGenreFilter = genre;
       var label = document.getElementById('activeGenreLabel');
@@ -1472,6 +1503,7 @@
       applyFilters();
     }
 
+    // ★ フィルタリング（検索キーワード入力時は所持・攻略ステータス制限を自動バイパス）
     function applyFilters() {
       var q = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim().toLowerCase();
       var sortVal = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'release_asc';
@@ -1486,35 +1518,47 @@
         var g = catalog[i];
         var u = getUserState(g);
 
-        if (currentCollectFilter === 'owned' && !u.owned) continue;
-        if (currentCollectFilter === 'cleared' && u.status !== 'cleared') continue;
-        if (currentCollectFilter === 'wanted' && u.status !== 'wanted') continue;
-        if (currentCollectFilter === 'playing' && u.status !== 'playing') continue;
-        if (currentCollectFilter === 'unowned' && u.owned) continue;
+        // 1. 所持ステータス判定（★ 検索窓に文字がある場合は全ゲームを対象にするためスキップ）
+        if (!q) {
+          if (currentHoldFilter === 'owned' && !u.owned) continue;
+          if (currentHoldFilter === 'wanted' && u.hold_status !== 'wanted') continue;
+          if (currentHoldFilter === 'unowned' && u.owned) continue;
+        }
 
+        // 2. 攻略ステータス判定（★ 検索窓に文字がある場合はスキップ）
+        if (!q && currentPlayFilter !== 'ALL') {
+          if (u.play_status !== currentPlayFilter) continue;
+        }
+
+        // 3. ハード
         if (currentPlatformFilter !== 'ALL' && g.platform !== currentPlatformFilter) continue;
         
-        // ★ ジャンル判定
+        // 4. ジャンル
         if (currentGenreFilter !== 'ALL') {
           var gGenre = (g.genre || '未分類').trim();
           if (gGenre !== currentGenreFilter) continue;
         }
 
+        // 5. 状態ランク
         if (currentRankFilter !== 'ALL' && u.rank !== currentRankFilter) continue;
 
+        // 6. 面白さ
         if (currentRatingFilter > 0) {
           if ((u.rating || 0) < currentRatingFilter) continue;
         }
 
+        // 7. こだわり条件
         if (chkComp && !u.complete) continue;
         if (chkBat && !u.battery) continue;
         if (chkClean && !u.cleaned) continue;
         if (chkTest && !u.tested) continue;
 
+        // 8. 記念日
         if (currentAnniversaryFilter) {
           if (getMonthDayString(g.release_date) !== currentAnniversaryFilter) continue;
         }
 
+        // 9. 検索ワード照合（インデックスによる高速検索）
         if (q) {
           if (!g._searchIndex || g._searchIndex.indexOf(q) === -1) continue;
         }
@@ -1527,7 +1571,8 @@
           genre: g.genre,
           release_date: g.release_date,
           cover_url: u.cover_url || g.cover_url || '',
-          status: u.status,
+          hold_status: u.hold_status,
+          play_status: u.play_status,
           owned: u.owned,
           complete: u.complete,
           cleaned: u.cleaned,
@@ -1622,14 +1667,17 @@
             '</div>';
 
         var badgesHtml = '';
-        if (game.status === 'cleared') {
+        
+        if (game.play_status === 'cleared') {
           badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">🏆 クリア済</span>';
-        } else if (isOwned) {
-          if (game.complete) badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">👑 完品</span>';
-        } else if (game.status === 'wanted') {
-          badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-sky-500 text-white font-black text-[9px] shadow">ほしい</span>';
-        } else if (game.status === 'playing') {
+        } else if (game.play_status === 'playing') {
           badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-purple-500 text-white font-black text-[9px] shadow">プレイ中</span>';
+        }
+
+        if (isOwned) {
+          if (game.complete) badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">👑 完品</span>';
+        } else if (game.hold_status === 'wanted') {
+          badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-sky-500 text-white font-black text-[9px] shadow">ほしい</span>';
         }
 
         if (game.rating > 0) {
@@ -1686,7 +1734,7 @@
             '<div class="min-w-0 flex-1">' +
               '<div class="flex items-center gap-2 flex-wrap">' +
                 '<h4 class="font-bold text-slate-800 text-xs sm:text-sm truncate">' + escapeHtml(game.title) + '</h4>' +
-                (game.status === 'cleared' ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">🏆 クリア済</span>' : '') +
+                (game.play_status === 'cleared' ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">🏆 クリア済</span>' : '') +
                 (game.complete ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">👑 完品</span>' : '') +
                 (game.rating > 0 ? '<span class="text-amber-500 font-bold text-xs tracking-tight flex-shrink-0 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">' + '★'.repeat(game.rating) + '</span>' : '') +
               '</div>' +
@@ -1698,8 +1746,8 @@
             '</div>' +
           '</div>' +
           '<div class="flex items-center gap-3 text-xs flex-shrink-0">' +
-            (game.status === 'cleared' ? '<span class="font-black text-amber-500 text-xs">クリア済</span>' :
-             isOwned ? '<span class="font-black text-emerald-600 text-xs">所持</span>' : '<span class="text-slate-400 text-xs">未所持</span>') +
+            (isOwned ? '<span class="font-black text-emerald-600 text-xs">所持</span>' : 
+             game.hold_status === 'wanted' ? '<span class="font-bold text-sky-500 text-xs">ほしい</span>' : '<span class="text-slate-400 text-xs">未所持</span>') +
             (game.rank ? '<span class="px-1.5 py-0.5 rounded bg-slate-100 font-bold text-slate-600 text-[10px]">' + game.rank + '</span>' : '') +
           '</div>' +
         '</div>';
@@ -1726,7 +1774,7 @@
       var elBadge = document.getElementById('detailBadgeHard');
       if (elBadge) elBadge.textContent = game.platform || 'GAME';
 
-      updateDetailStatusBadge(u.status);
+      updateDetailHeaderBadges(u.hold_status, u.play_status);
 
       var elCompBadge = document.getElementById('detailCompleteBadge');
       if (elCompBadge) elCompBadge.classList.toggle('hidden', !u.complete);
@@ -1794,7 +1842,8 @@
       if (quickPostInput) quickPostInput.value = '';
       renderDetailGamePosts();
 
-      updateDetailCollectButtons(u.status);
+      updateDetailHoldButtons(u.hold_status);
+      updateDetailPlayButtons(u.play_status);
       updateDetailRating(u.rating || 0);
 
       updateDetailAccessoryButtons(u);
@@ -1849,54 +1898,96 @@
       }
     }
 
-    function setDetailCollectStatus(newStatus) {
+    function setDetailHoldStatus(status) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
       if (!userStates[k]) userStates[k] = getUserState(currentDetailGame);
 
-      userStates[k].status = newStatus;
-      userStates[k].owned = (newStatus === 'owned' || newStatus === 'cleared');
+      userStates[k].hold_status = status;
+      userStates[k].owned = (status === 'owned');
       saveUserStates();
       detailModalDirty = true;
       updateSingleCardDom(currentDetailGame.id);
 
-      updateDetailCollectButtons(newStatus);
-      updateDetailStatusBadge(newStatus);
-      showToast('ステータスを更新しました', 'info');
+      updateDetailHoldButtons(status);
+      updateDetailHeaderBadges(status, userStates[k].play_status || 'none');
+      showToast('所持ステータスを更新しました', 'info');
     }
 
-    function updateDetailStatusBadge(status) {
-      var badge = document.getElementById('detailStatusBadge');
-      if (!badge) return;
-      var map = {
-        'owned': { text: '📦 所持', class: 'bg-emerald-600 text-white' },
-        'cleared': { text: '🏆 クリア済', class: 'bg-amber-400 text-slate-950 font-black' },
-        'playing': { text: '🎮 プレイ中', class: 'bg-purple-600 text-white' },
-        'wanted': { text: '⭐ ほしい', class: 'bg-sky-500 text-white' },
-        'unowned': { text: '未所持', class: 'bg-slate-700 text-slate-300' }
-      };
-      var info = map[status] || map['unowned'];
-      badge.textContent = info.text;
-      badge.className = 'px-2 py-0.5 rounded text-[11px] font-black shadow ' + info.class;
+    function setDetailPlayStatus(status) {
+      if (!currentDetailGame) return;
+      var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
+      if (!userStates[k]) userStates[k] = getUserState(currentDetailGame);
+
+      userStates[k].play_status = status;
+      saveUserStates();
+      detailModalDirty = true;
+      updateSingleCardDom(currentDetailGame.id);
+
+      updateDetailPlayButtons(status);
+      updateDetailHeaderBadges(userStates[k].hold_status || 'unowned', status);
+      showToast('攻略ステータスを更新しました', 'info');
     }
 
-    function updateDetailCollectButtons(activeStatus) {
-      var list = ['owned', 'cleared', 'playing', 'wanted', 'unowned'];
-      var activeStyles = {
-        'owned': 'bg-emerald-600 text-white border-emerald-600 shadow-sm',
-        'cleared': 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm font-black',
-        'playing': 'bg-purple-600 text-white border-purple-600 shadow-sm',
-        'wanted': 'bg-sky-500 text-white border-sky-500 shadow-sm',
-        'unowned': 'bg-slate-700 text-white border-slate-700 shadow-sm'
-      };
+    function updateDetailHeaderBadges(hold, play) {
+      var hBadge = document.getElementById('detailHoldBadge');
+      var pBadge = document.getElementById('detailPlayBadge');
 
-      list.forEach(function(st) {
-        var btn = document.getElementById('btnDetailCollect_' + st);
+      if (hBadge) {
+        if (hold === 'owned') {
+          hBadge.textContent = '📦 所持';
+          hBadge.className = 'px-2 py-0.5 rounded text-[11px] font-black bg-emerald-600 text-white shadow';
+        } else if (hold === 'wanted') {
+          hBadge.textContent = '⭐ ほしい';
+          hBadge.className = 'px-2 py-0.5 rounded text-[11px] font-black bg-sky-500 text-white shadow';
+        } else {
+          hBadge.textContent = '未所持';
+          hBadge.className = 'px-2 py-0.5 rounded text-[11px] font-black bg-slate-700 text-slate-300 shadow';
+        }
+      }
+
+      if (pBadge) {
+        if (play === 'cleared') {
+          pBadge.textContent = '🏆 クリア済';
+          pBadge.className = 'px-2 py-0.5 rounded text-[11px] font-black bg-amber-400 text-slate-950 shadow';
+          pBadge.classList.remove('hidden');
+        } else if (play === 'playing') {
+          pBadge.textContent = '🎮 プレイ中';
+          pBadge.className = 'px-2 py-0.5 rounded text-[11px] font-black bg-purple-600 text-white shadow';
+          pBadge.classList.remove('hidden');
+        } else {
+          pBadge.classList.add('hidden');
+        }
+      }
+    }
+
+    function updateDetailHoldButtons(selected) {
+      ['owned', 'wanted', 'unowned'].forEach(function(st) {
+        var btn = document.getElementById('btnDetailHold_' + st);
         if (btn) {
-          if (st === activeStatus) {
-            btn.className = 'py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 ' + activeStyles[st];
+          if (st === selected) {
+            var activeClass = (st === 'owned') ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' :
+                              (st === 'wanted') ? 'bg-sky-500 text-white border-sky-500 shadow-sm' :
+                              'bg-slate-700 text-white border-slate-700 shadow-sm';
+            btn.className = 'py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 ' + activeClass;
           } else {
-            btn.className = 'py-2 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+            btn.className = 'py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+          }
+        }
+      });
+    }
+
+    function updateDetailPlayButtons(selected) {
+      ['cleared', 'playing', 'none'].forEach(function(st) {
+        var btn = document.getElementById('btnDetailPlay_' + st);
+        if (btn) {
+          if (st === selected) {
+            var activeClass = (st === 'cleared') ? 'bg-amber-400 text-slate-950 border-amber-400 font-black shadow-sm' :
+                              (st === 'playing') ? 'bg-purple-600 text-white border-purple-600 shadow-sm' :
+                              'bg-slate-700 text-white border-slate-700 shadow-sm';
+            btn.className = 'py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 ' + activeClass;
+          } else {
+            btn.className = 'py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1 bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
           }
         }
       });
@@ -2482,7 +2573,7 @@
         if (searchInput) searchInput.value = value;
       }
 
-      setCollectionStatusFilter('unowned');
+      setHoldFilter('unowned');
       showToast('「' + value + '」の未所持タイトルを絞り込みました', 'info');
     }
 
@@ -2817,11 +2908,11 @@
           if (titles.indexOf(clean) !== -1) {
             var k = makeStateKey(g.title, g.platform);
             if (!userStates[k]) {
-              userStates[k] = { status: 'owned', owned: true, rank: 'B' };
+              userStates[k] = { hold_status: 'owned', play_status: 'none', owned: true, rank: 'B' };
               added++;
             } else if (!userStates[k].owned) {
               userStates[k].owned = true;
-              userStates[k].status = 'owned';
+              userStates[k].hold_status = 'owned';
               added++;
             }
           }
@@ -2838,7 +2929,7 @@
     function exportDataBackup() {
       var data = {
         app: 'RETROVAULT_COLLECTOR',
-        version: '3.0',
+        version: '3.1',
         exported_at: new Date().toISOString(),
         user_states: userStates,
         play_posts: playPosts
@@ -2860,27 +2951,35 @@
       var completeCount = 0;
       var wantedCount = 0;
       var playingCount = 0;
+      var unplayedCount = 0;
 
       var keys = Object.keys(userStates);
       for (var i = 0; i < keys.length; i++) {
-        var u = userStates[keys[i]];
-        if (u.status === 'cleared') {
-          clearedCount++;
-        }
-        if (u.status === 'owned' || u.status === 'cleared') {
+        var u = getUserState({ title: keys[i].split('::')[0], platform: keys[i].split('::')[1] });
+        
+        if (u.owned) {
           ownedCount++;
-          if (u.box && u.manual && u.postcard && u.obi && u.bonus) completeCount++;
-        } else if (u.status === 'wanted') {
+          if (u.complete) completeCount++;
+        } else if (u.hold_status === 'wanted') {
           wantedCount++;
-        } else if (u.status === 'playing') {
+        }
+
+        if (u.play_status === 'cleared') {
+          clearedCount++;
+        } else if (u.play_status === 'playing') {
           playingCount++;
         }
       }
+
+      unplayedCount = Math.max(0, totalCatalog - (clearedCount + playingCount));
 
       var rate = totalCatalog > 0 ? (Math.round((ownedCount / totalCatalog) * 1000) / 10).toFixed(1) : '0.0';
 
       var elOwned = document.getElementById('sumOwnedCount');
       if (elOwned) elOwned.textContent = ownedCount;
+
+      var elCleared = document.getElementById('sumClearedCount');
+      if (elCleared) elCleared.textContent = clearedCount;
 
       var elComp = document.getElementById('sumCompleteCount');
       if (elComp) elComp.textContent = completeCount;
@@ -2894,19 +2993,25 @@
       var elRate = document.getElementById('sumCollectRate');
       if (elRate) elRate.textContent = rate + '%';
 
-      var bOwned = document.getElementById('badgeStat_owned');
-      var bCleared = document.getElementById('badgeStat_cleared');
-      var bAll = document.getElementById('badgeStat_all');
-      var bWanted = document.getElementById('badgeStat_wanted');
-      var bPlaying = document.getElementById('badgeStat_playing');
-      var bUnowned = document.getElementById('badgeStat_unowned');
+      var bHoldOwned = document.getElementById('badgeHold_owned');
+      var bHoldAll = document.getElementById('badgeHold_all');
+      var bHoldWanted = document.getElementById('badgeHold_wanted');
+      var bHoldUnowned = document.getElementById('badgeHold_unowned');
 
-      if (bOwned) bOwned.textContent = ownedCount;
-      if (bCleared) bCleared.textContent = clearedCount;
-      if (bAll) bAll.textContent = totalCatalog;
-      if (bWanted) bWanted.textContent = wantedCount;
-      if (bPlaying) bPlaying.textContent = playingCount;
-      if (bUnowned) bUnowned.textContent = Math.max(0, totalCatalog - ownedCount);
+      if (bHoldOwned) bHoldOwned.textContent = ownedCount;
+      if (bHoldAll) bHoldAll.textContent = totalCatalog;
+      if (bHoldWanted) bHoldWanted.textContent = wantedCount;
+      if (bHoldUnowned) bHoldUnowned.textContent = Math.max(0, totalCatalog - ownedCount);
+
+      var bPlayAll = document.getElementById('badgePlay_ALL');
+      var bPlayCleared = document.getElementById('badgePlay_cleared');
+      var bPlayPlaying = document.getElementById('badgePlay_playing');
+      var bPlayNone = document.getElementById('badgePlay_none');
+
+      if (bPlayAll) bPlayAll.textContent = totalCatalog;
+      if (bPlayCleared) bPlayCleared.textContent = clearedCount;
+      if (bPlayPlaying) bPlayPlaying.textContent = playingCount;
+      if (bPlayNone) bPlayNone.textContent = unplayedCount;
     }
 
     function showToast(msg, type) {
@@ -2930,10 +3035,11 @@
     document.addEventListener('DOMContentLoaded', function() {
       loadSavedStates();
       setViewMode(currentViewMode);
-      setCollectionStatusFilter(currentCollectFilter);
+      setHoldFilter(currentHoldFilter);
+      setPlayFilter(currentPlayFilter);
       if (catalog.length > 0) {
         updatePlatformSidebarPills(catalog);
-        updateGenreSidebarPills(catalog); // ★ 初回ジャンルタグ生成
+        updateGenreSidebarPills(catalog);
         applyFilters();
       }
       renderPlayPosts();
