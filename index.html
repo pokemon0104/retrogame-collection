@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>レトロゲームコレクション</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase SDK (Compat版) -->
@@ -10,6 +10,12 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <style>
+    html, body {
+      overflow-x: hidden !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      position: relative;
+    }
     ::-webkit-scrollbar { width: 7px; height: 7px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -24,15 +30,15 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans select-none overflow-x-hidden w-full max-w-[100vw]">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans select-none overflow-x-hidden w-full max-w-full">
 
   <!-- ① メインヘッダー -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm w-full">
-    <div class="max-w-7xl mx-auto px-2 sm:px-6">
-      <div class="flex items-center justify-between h-14 sm:h-16 gap-1 sm:gap-2">
+    <div class="max-w-7xl mx-auto px-2.5 sm:px-6">
+      <div class="flex flex-wrap items-center justify-between gap-y-1.5 py-1.5 sm:py-0 sm:h-16">
         
-        <!-- ロゴ / タイトル -->
-        <div class="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer flex-shrink-0" onclick="goToTop()">
+        <!-- 1. ロゴ / タイトル -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer flex-shrink-0 order-1" onclick="goToTop()">
           <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center flex-shrink-0 p-1">
             <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -58,40 +64,16 @@
               <circle cx="16" cy="16" r="2.3" fill="#464950"/>
             </svg>
           </div>
-          <div>
-            <h1 class="font-black tracking-tight text-slate-900 text-xs sm:text-base leading-tight truncate max-w-[150px] sm:max-w-none">レトロゲームコレクション</h1>
+          <div class="min-w-0">
+            <h1 class="font-black tracking-tight text-slate-900 text-xs sm:text-base leading-tight truncate max-w-[130px] sm:max-w-none">レトロゲームコレクション</h1>
             <p class="text-[9px] text-slate-400 font-medium hidden sm:block">レトロゲームを集めよう！</p>
           </div>
         </div>
 
-        <!-- ナビゲーションタブ -->
-        <nav class="flex items-center gap-0.5 sm:gap-1">
-          <button type="button" id="tabNavCatalog" onclick="switchNavTab('catalog')" title="ゲーム一覧" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-            <span class="hidden md:inline">ゲーム一覧</span>
-          </button>
-          <button type="button" id="tabNavProgress" onclick="openProgressModal()" title="達成率" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
-            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            <span class="hidden md:inline">達成率</span>
-          </button>
-          <button type="button" id="tabNavPosts" onclick="switchNavTab('posts')" title="つぶやき" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
-            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-            <span class="hidden lg:inline">つぶやき</span>
-          </button>
-          <button type="button" id="tabNavCalendar" onclick="switchNavTab('calendar')" title="記念日" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
-            <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            <span class="hidden lg:inline">記念日</span>
-          </button>
-          <button type="button" id="tabNavNews" onclick="switchNavTab('news')" title="ニュース" class="flex items-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
-            <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-            <span class="hidden lg:inline">ニュース</span>
-          </button>
-        </nav>
-
-        <!-- アクションボタン -->
-        <div class="flex items-center gap-1 flex-shrink-0">
+        <!-- 2. アクションボタン群 -->
+        <div class="flex items-center gap-1 flex-shrink-0 order-2 sm:order-3">
           <div id="authContainer" class="flex items-center">
-            <button type="button" id="btnGoogleLogin" onclick="loginWithGoogle()" title="Googleログインして同期" class="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition flex items-center gap-1.5">
+            <button type="button" id="btnGoogleLogin" onclick="loginWithGoogle()" title="Googleログインして同期" class="p-1 sm:px-2.5 sm:py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition flex items-center gap-1">
               <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -101,35 +83,59 @@
               <span class="hidden md:inline">ログイン</span>
             </button>
             <div id="userProfile" class="hidden items-center gap-1">
-              <img id="userAvatar" src="" alt="User" class="w-7 h-7 rounded-full border border-emerald-500 object-cover" title="クラウド同期有効">
-              <button type="button" onclick="logoutFromGoogle()" title="ログアウト" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-xl transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+              <img id="userAvatar" src="" alt="User" class="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-emerald-500 object-cover" title="クラウド同期有効">
+              <button type="button" onclick="logoutFromGoogle()" title="ログアウト" class="p-1 text-slate-400 hover:text-rose-600 rounded-xl transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
               </button>
             </div>
           </div>
 
-          <button type="button" id="btnSyncMaster" onclick="syncMasterCsv(false)" title="スプレッドシートマスターと同期" class="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition flex items-center gap-1">
+          <button type="button" id="btnSyncMaster" onclick="syncMasterCsv(false)" title="スプレッドシートマスターと同期" class="p-1 sm:px-2.5 sm:py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-sm transition flex items-center gap-1">
             <svg id="syncIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            <span class="hidden md:inline">シート同期</span>
+            <span class="hidden md:inline">同期</span>
           </button>
-          <button type="button" onclick="openCsvImportModal()" title="所持CSVファイル取込" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <button type="button" onclick="openCsvImportModal()" title="所持CSVファイル取込" class="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
           </button>
-          <button type="button" onclick="exportDataBackup()" title="データJSONバックアップ" class="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <button type="button" onclick="exportDataBackup()" title="データJSONバックアップ" class="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           </button>
         </div>
+
+        <!-- 3. ナビゲーションタブ -->
+        <nav class="flex items-center justify-around sm:justify-start gap-1 w-full sm:w-auto order-3 sm:order-2 border-t sm:border-t-0 border-slate-100 sm:border-transparent pt-1 sm:pt-0">
+          <button type="button" id="tabNavCatalog" onclick="switchNavTab('catalog')" title="ゲーム一覧" class="flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            <span class="text-[11px] sm:text-xs">一覧</span>
+          </button>
+          <button type="button" id="tabNavProgress" onclick="openProgressModal()" title="達成率" class="flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span class="text-[11px] sm:text-xs">達成率</span>
+          </button>
+          <button type="button" id="tabNavPosts" onclick="switchNavTab('posts')" title="つぶやき" class="flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            <span class="text-[11px] sm:text-xs">つぶやき</span>
+          </button>
+          <button type="button" id="tabNavCalendar" onclick="switchNavTab('calendar')" title="記念日" class="flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span class="text-[11px] sm:text-xs">記念日</span>
+          </button>
+          <button type="button" id="tabNavNews" onclick="switchNavTab('news')" title="ニュース" class="flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+            <span class="text-[11px] sm:text-xs">ニュース</span>
+          </button>
+        </nav>
 
       </div>
     </div>
   </header>
 
   <!-- ② サマリーストリップ -->
-  <section class="bg-slate-900 text-slate-100 border-b border-slate-800 py-2 px-3 sm:px-6 shadow-inner w-full">
+  <section class="bg-slate-900 text-slate-100 border-b border-slate-800 py-2 px-2.5 sm:px-6 shadow-inner w-full">
     <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-y-1.5 gap-x-2 text-[11px] sm:text-xs">
       <div class="flex items-center gap-1.5 min-w-0">
         <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
-        <span id="syncStatusText" class="text-slate-300 font-medium truncate max-w-[130px] sm:max-w-none">マスター読込中...</span>
+        <span id="syncStatusText" class="text-slate-300 font-medium truncate max-w-[120px] sm:max-w-none">マスター読込中...</span>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
@@ -162,27 +168,27 @@
   </section>
 
   <!-- ③ メインコンテナ -->
-  <main class="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex-1 w-full space-y-3">
+  <main class="max-w-7xl mx-auto px-2.5 sm:px-6 py-3 sm:py-4 flex-1 w-full space-y-3">
     
     <div id="sectionCatalog" class="w-full space-y-3">
       
       <!-- 検索ツールバー -->
-      <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <div class="bg-white p-2.5 sm:p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <div class="relative flex-1">
-          <input type="text" id="searchInput" oninput="debouncedApplyFilters()" placeholder="タイトル、メーカー、発売年ですぐに検索・登録..." class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
-          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="searchInput" oninput="debouncedApplyFilters()" placeholder="タイトル、メーカー、発売年ですぐに検索・登録..." class="w-full pl-9 pr-8 py-2 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5 sm:top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <button type="button" onclick="clearSearchInput()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden" id="clearSearchBtn">✕</button>
         </div>
 
         <div class="flex items-center gap-2 justify-between sm:justify-end flex-wrap">
-          <button type="button" id="btnToggleFilterPanel" onclick="toggleFilterDrawer()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition border border-slate-200">
+          <button type="button" id="btnToggleFilterPanel" onclick="toggleFilterDrawer()" class="flex items-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition border border-slate-200">
             <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
             <span>絞り込み</span>
             <span id="filterActiveBadge" class="w-2 h-2 rounded-full bg-emerald-500 hidden"></span>
             <span id="filterArrowIcon" class="text-[10px] text-slate-400 transition-transform" style="transform: rotate(180deg);">▼</span>
           </button>
 
-          <select id="sortSelect" onchange="applyFilters()" class="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <select id="sortSelect" onchange="applyFilters()" class="text-[11px] sm:text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-2 py-1.5 sm:px-2.5 sm:py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
             <option value="release_asc">発売日 (古い順)</option>
             <option value="release_desc">発売日 (新しい順)</option>
             <option value="rating_desc">面白さ順 (★)</option>
@@ -192,18 +198,18 @@
           </select>
 
           <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
-            <button type="button" id="btnViewGrid" onclick="setViewMode('grid')" title="ジャケットグリッド表示" class="p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            <button type="button" id="btnViewGrid" onclick="setViewMode('grid')" title="ジャケットグリッド表示" class="p-1 sm:p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition">
+              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
             </button>
-            <button type="button" id="btnViewList" onclick="setViewMode('list')" title="詳細リスト表示" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <button type="button" id="btnViewList" onclick="setViewMode('list')" title="詳細リスト表示" class="p-1 sm:p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- 絞り込みフィルターパネル（所持 ＆ 攻略ステータスを完全分離） -->
-      <aside id="filterSidebar" class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4 w-full transition-all duration-200">
+      <!-- 絞り込みフィルターパネル（5列構成） -->
+      <aside id="filterSidebar" class="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-sm space-y-4 w-full transition-all duration-200">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
@@ -215,7 +221,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
           
           <!-- ① 所持ステータス ＆ 攻略ステータス -->
           <div class="space-y-3">
@@ -317,22 +323,31 @@
             </div>
           </div>
 
-          <!-- ③ 対応ハード別クイック選択 -->
+          <!-- ③ ★ 五十音別クイック選択 -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-400">五十音</span>
+              <span id="activeSyllabaryLabel" class="text-[11px] font-bold text-emerald-600">すべて</span>
+            </div>
+            <div id="sidebarSyllabaryPills" class="flex flex-wrap gap-1 max-h-40 overflow-y-auto pr-1"></div>
+          </div>
+
+          <!-- ④ 対応ハード別クイック選択 -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-bold text-slate-400">対応ハード</span>
               <span id="activeHardLabel" class="text-[11px] font-bold text-emerald-600">すべて</span>
             </div>
-            <div id="sidebarPlatformPills" class="flex flex-wrap gap-1 max-h-48 overflow-y-auto pr-1"></div>
+            <div id="sidebarPlatformPills" class="flex flex-wrap gap-1 max-h-40 overflow-y-auto pr-1"></div>
           </div>
 
-          <!-- ④ ジャンル別クイック選択 -->
+          <!-- ⑤ ジャンル別クイック選択 -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-bold text-slate-400">ジャンル</span>
               <span id="activeGenreLabel" class="text-[11px] font-bold text-emerald-600">すべて</span>
             </div>
-            <div id="sidebarGenrePills" class="flex flex-wrap gap-1 max-h-48 overflow-y-auto pr-1"></div>
+            <div id="sidebarGenrePills" class="flex flex-wrap gap-1 max-h-40 overflow-y-auto pr-1"></div>
           </div>
         </div>
       </aside>
@@ -354,7 +369,7 @@
 
     <!-- プレイポスト（つぶやき）セクション -->
     <div id="sectionPosts" class="space-y-4 hidden">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
         <h3 class="text-sm font-black text-slate-800 mb-3 flex items-center gap-2">
           <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
           プレイ記録をつぶやく
@@ -396,7 +411,7 @@
 
     <!-- カレンダーセクション -->
     <div id="sectionCalendar" class="space-y-4 hidden">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div class="flex items-center gap-2">
             <button type="button" onclick="shiftCalendarMonth(-1)" class="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition">◀</button>
@@ -484,7 +499,7 @@
       </div>
 
       <!-- モーダル本文 -->
-      <div class="p-5 overflow-y-auto space-y-4 flex-1 bg-slate-50/70 text-xs">
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 bg-slate-50/70 text-xs">
         
         <!-- 所持ステータストグル -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
@@ -786,6 +801,7 @@
     var currentPlayFilter = 'ALL';
     var currentPlatformFilter = 'ALL';
     var currentGenreFilter = 'ALL';
+    var currentSyllabaryFilter = 'ALL'; // ★ 五十音フィルター状態 ('ALL', 'ア', 'カ', ...)
     var currentRankFilter = 'ALL';
     var currentRatingFilter = 0;
     var currentSort = 'release_asc';
@@ -818,7 +834,7 @@
     function buildSearchIndexForCatalog() {
       for (var i = 0; i < catalog.length; i++) {
         var g = catalog[i];
-        g._searchIndex = (g.title + ' ' + g.platform + ' ' + g.publisher + ' ' + g.genre + ' ' + g.release_date).toLowerCase();
+        g._searchIndex = (g.title + ' ' + (g.kana || '') + ' ' + g.platform + ' ' + g.publisher + ' ' + g.genre + ' ' + g.release_date).toLowerCase();
       }
     }
 
@@ -898,6 +914,44 @@
         return parseInt(parts[0], 10) + '月' + parseInt(parts[1], 10) + '日';
       }
       return mmdd;
+    }
+
+    // ★ 五十音用：記号や空白を取り除いた先頭文字を抽出
+    function getFirstCharForSyllabary(str) {
+      if (!str) return '';
+      var clean = String(str).replace(/^[  \t\r\n『』【】「」"'\(\)（）［］\[\]!！?？・:：〜~～\-\_\/]+/g, '');
+      return clean.charAt(0);
+    }
+
+    // ★ 五十音マッチング判定
+    function matchSyllabary(char, row) {
+      if (row === 'ALL') return true;
+      if (!char) return false;
+      
+      var map = {
+        'ア': /^[あいうえおアイウエオぁぃぅぇぉァィゥェォヴ]/i,
+        'カ': /^[かきくけこがぎぐげごカキクケコガギグゲゴヵヶ]/i,
+        'サ': /^[さしすせそざじずぜぞサシスセソザジズゼゾ]/i,
+        'タ': /^[たちつてとだぢづでどタチツテトダヂヅデドっッ]/i,
+        'ナ': /^[なにぬねのナニヌネノ]/i,
+        'ハ': /^[はひふへほばびぶべぼぱぴぷぺぽハヒフヘホバビブベボパピプペポ]/i,
+        'マ': /^[まみむめもマミムメモ]/i,
+        'ヤ': /^[やゆよヤユヨゃゅょャュョ]/i,
+        'ラ': /^[らりるれろラリルレロ]/i,
+        'ワ': /^[わをんワヲンゎヮ]/i
+      };
+
+      if (map[row]) {
+        return map[row].test(char);
+      }
+
+      if (row === '英数・他') {
+        for (var k in map) {
+          if (map[k].test(char)) return false;
+        }
+        return true;
+      }
+      return false;
     }
 
     function getUserState(game) {
@@ -1100,6 +1154,37 @@
       syncToFirestore();
     }
 
+    function quickToggleOwned(gameId) {
+      var game = null;
+      for (var i = 0; i < catalog.length; i++) {
+        if (catalog[i].id === gameId) {
+          game = catalog[i];
+          break;
+        }
+      }
+      if (!game) return;
+
+      var k = makeStateKey(game.title, game.platform);
+      if (!userStates[k]) userStates[k] = getUserState(game);
+
+      var currentlyOwned = (userStates[k].hold_status === 'owned');
+      var nextHold = currentlyOwned ? 'unowned' : 'owned';
+
+      userStates[k].hold_status = nextHold;
+      userStates[k].owned = !currentlyOwned;
+
+      saveUserStates();
+
+      var q = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim();
+      if (q) {
+        updateSingleCardDom(game.id);
+      } else {
+        applyFilters();
+      }
+
+      showToast(nextHold === 'owned' ? ('「' + game.title + '」を所持に登録しました') : ('「' + game.title + '」の所持を解除しました'), nextHold === 'owned' ? 'success' : 'info');
+    }
+
     function parseCsvToRows(csvText) {
       var rows = [];
       var currentRow = [];
@@ -1192,6 +1277,7 @@
           var colPlatform = 2;
           var colPublisher = 3;
           var colGenre = 4;
+          var colKana = -1;
           var colCoverUrl = 6;
 
           if (rows.length > 0) {
@@ -1199,6 +1285,7 @@
             header.forEach(function(col, idx) {
               if (col.indexOf('発売日') !== -1 || col === 'date') colRelease = idx;
               if (col.indexOf('タイトル') !== -1 || col === 'title') colTitle = idx;
+              if (col.indexOf('カナ') !== -1 || col.indexOf('かな') !== -1 || col.indexOf('よみ') !== -1 || col.indexOf('読み') !== -1 || col === 'reading') colKana = idx;
               if (col.indexOf('ハード') !== -1 || col === 'platform') colPlatform = idx;
               if (col.indexOf('メーカー') !== -1 || col === 'publisher') colPublisher = idx;
               if (col.indexOf('ジャンル') !== -1 || col === 'genre') colGenre = idx;
@@ -1220,12 +1307,14 @@
             var d = normalizeDate(r[colRelease]);
             var pub = String(r[colPublisher] || '不明').trim();
             var g = String(r[colGenre] || 'ゲーム').trim();
+            var k = (colKana !== -1 && r[colKana]) ? String(r[colKana]).trim() : '';
             var cUrl = (r.length > colCoverUrl && r[colCoverUrl]) ? String(r[colCoverUrl]).trim() : '';
 
             var gameId = 'gm_' + Math.abs(hashCode(makeStateKey(t, p))).toString(36);
             newCatalog.push({
               id: gameId,
               title: t,
+              kana: k,
               platform: p,
               publisher: pub,
               genre: g,
@@ -1245,6 +1334,7 @@
 
           updatePlatformSidebarPills(catalog);
           updateGenreSidebarPills(catalog);
+          updateSyllabarySidebarPills(catalog); // ★ 五十音タグ生成
           applyFilters();
           renderCalendar();
           if (!isSilent) showToast('スプレッドシートマスターを最新化しました', 'success');
@@ -1265,8 +1355,8 @@
       var btnGrid = document.getElementById('btnViewGrid');
       var btnList = document.getElementById('btnViewList');
       if (btnGrid && btnList) {
-        btnGrid.className = (mode === 'grid') ? 'p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition' : 'p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
-        btnList.className = (mode === 'list') ? 'p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition' : 'p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
+        btnGrid.className = (mode === 'grid') ? 'p-1 sm:p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition' : 'p-1 sm:p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
+        btnList.className = (mode === 'list') ? 'p-1 sm:p-1.5 rounded-lg bg-white text-emerald-600 shadow-sm transition' : 'p-1 sm:p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
       }
       applyFilters();
     }
@@ -1342,11 +1432,60 @@
       applyFilters();
     }
 
+    // ★ 五十音切り替え
+    function setQuickSyllabary(row) {
+      currentSyllabaryFilter = row;
+      var label = document.getElementById('activeSyllabaryLabel');
+      if (label) label.textContent = (row === 'ALL') ? 'すべて' : row;
+      updateSyllabarySidebarPills(catalog);
+      applyFilters();
+    }
+
+    // ★ 五十音タグの動的生成
+    function updateSyllabarySidebarPills(list) {
+      var counts = {
+        'ア': 0, 'カ': 0, 'サ': 0, 'タ': 0, 'ナ': 0,
+        'ハ': 0, 'マ': 0, 'ヤ': 0, 'ラ': 0, 'ワ': 0,
+        '英数・他': 0
+      };
+
+      list.forEach(function(g) {
+        var str = g.kana || g.title || '';
+        var firstChar = getFirstCharForSyllabary(str);
+        var matched = false;
+        for (var row in counts) {
+          if (row !== '英数・他' && matchSyllabary(firstChar, row)) {
+            counts[row]++;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          counts['英数・他']++;
+        }
+      });
+
+      var container = document.getElementById('sidebarSyllabaryPills');
+      if (!container) return;
+
+      var rows = ['ALL', 'ア', 'カ', 'サ', 'タ', 'ナ', 'ハ', 'マ', 'ヤ', 'ラ', 'ワ', '英数・他'];
+      var html = rows.map(function(r) {
+        var isSel = (currentSyllabaryFilter === r);
+        var countText = (r === 'ALL') ? ('(' + list.length + ')') : ('(' + (counts[r] || 0) + ')');
+        return '<button type="button" onclick="setQuickSyllabary(\'' + r + '\')" class="px-2 py-0.5 rounded-md text-[11px] font-bold transition ' + 
+          (isSel ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200') + 
+          '">' + r + ' <span class="opacity-75 font-normal text-[10px]">' + countText + '</span></button>';
+      }).join('');
+
+      container.innerHTML = html;
+    }
+
     function resetAllFilters() {
       currentHoldFilter = 'owned';
       currentPlayFilter = 'ALL';
       currentPlatformFilter = 'ALL';
       currentGenreFilter = 'ALL';
+      currentSyllabaryFilter = 'ALL'; // ★ リセット
       currentRankFilter = 'ALL';
       currentRatingFilter = 0;
       currentAnniversaryFilter = null;
@@ -1371,8 +1510,12 @@
       var genreLabel = document.getElementById('activeGenreLabel');
       if (genreLabel) genreLabel.textContent = 'すべて';
 
+      var sylLabel = document.getElementById('activeSyllabaryLabel');
+      if (sylLabel) sylLabel.textContent = 'すべて';
+
       updatePlatformSidebarPills(catalog);
       updateGenreSidebarPills(catalog);
+      updateSyllabarySidebarPills(catalog);
 
       setHoldFilter('owned');
       setPlayFilter('ALL');
@@ -1415,8 +1558,13 @@
       var gLabel = document.getElementById('activeGenreLabel');
       if (gLabel) gLabel.textContent = 'すべて';
 
+      currentSyllabaryFilter = 'ALL';
+      var sLabel = document.getElementById('activeSyllabaryLabel');
+      if (sLabel) sLabel.textContent = 'すべて';
+
       updatePlatformSidebarPills(catalog);
       updateGenreSidebarPills(catalog);
+      updateSyllabarySidebarPills(catalog);
       setRankFilter('ALL');
       setRatingFilter(0);
 
@@ -1503,7 +1651,6 @@
       applyFilters();
     }
 
-    // ★ フィルタリング（検索キーワード入力時は所持・攻略ステータス制限を自動バイパス）
     function applyFilters() {
       var q = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim().toLowerCase();
       var sortVal = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'release_asc';
@@ -1518,47 +1665,45 @@
         var g = catalog[i];
         var u = getUserState(g);
 
-        // 1. 所持ステータス判定（★ 検索窓に文字がある場合は全ゲームを対象にするためスキップ）
         if (!q) {
           if (currentHoldFilter === 'owned' && !u.owned) continue;
           if (currentHoldFilter === 'wanted' && u.hold_status !== 'wanted') continue;
           if (currentHoldFilter === 'unowned' && u.owned) continue;
+
+          if (currentPlayFilter !== 'ALL') {
+            if (u.play_status !== currentPlayFilter) continue;
+          }
         }
 
-        // 2. 攻略ステータス判定（★ 検索窓に文字がある場合はスキップ）
-        if (!q && currentPlayFilter !== 'ALL') {
-          if (u.play_status !== currentPlayFilter) continue;
-        }
-
-        // 3. ハード
         if (currentPlatformFilter !== 'ALL' && g.platform !== currentPlatformFilter) continue;
         
-        // 4. ジャンル
         if (currentGenreFilter !== 'ALL') {
           var gGenre = (g.genre || '未分類').trim();
           if (gGenre !== currentGenreFilter) continue;
         }
 
-        // 5. 状態ランク
+        // ★ 五十音判定
+        if (currentSyllabaryFilter !== 'ALL') {
+          var str = g.kana || g.title || '';
+          var firstChar = getFirstCharForSyllabary(str);
+          if (!matchSyllabary(firstChar, currentSyllabaryFilter)) continue;
+        }
+
         if (currentRankFilter !== 'ALL' && u.rank !== currentRankFilter) continue;
 
-        // 6. 面白さ
         if (currentRatingFilter > 0) {
           if ((u.rating || 0) < currentRatingFilter) continue;
         }
 
-        // 7. こだわり条件
         if (chkComp && !u.complete) continue;
         if (chkBat && !u.battery) continue;
         if (chkClean && !u.cleaned) continue;
         if (chkTest && !u.tested) continue;
 
-        // 8. 記念日
         if (currentAnniversaryFilter) {
           if (getMonthDayString(g.release_date) !== currentAnniversaryFilter) continue;
         }
 
-        // 9. 検索ワード照合（インデックスによる高速検索）
         if (q) {
           if (!g._searchIndex || g._searchIndex.indexOf(q) === -1) continue;
         }
@@ -1566,6 +1711,7 @@
         filtered.push({
           id: g.id,
           title: g.title,
+          kana: g.kana,
           platform: g.platform,
           publisher: g.publisher,
           genre: g.genre,
@@ -1605,7 +1751,7 @@
         if (currentViewMode === 'list') {
           container.className = 'bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm divide-y divide-slate-100';
         } else {
-          container.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4';
+          container.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4';
         }
         container.innerHTML = '';
         renderNextBatch();
@@ -1649,109 +1795,127 @@
       }
     }, { passive: true });
 
+    function renderSingleGridCardHtml(game) {
+      var isOwned = game.owned;
+      var hasCover = game.cover_url && isValidHttpUrl(game.cover_url);
+      var year = (game.release_date || '').slice(0, 4);
+
+      var coverHtml = hasCover
+        ? '<img src="' + escapeHtml(game.cover_url) + '" loading="lazy" alt="" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.parentElement.innerHTML=\'<div class=\\\'w-full h-full flex flex-col items-center justify-center p-2 bg-gradient-to-br from-slate-700 to-slate-900 text-white text-center\\\'><span class=\\\'text-[10px] font-bold opacity-60\\\'>' + escapeHtml(game.platform) + '</span><span class=\\\'text-xs font-black truncate max-w-full px-1 mt-1\\\'>' + escapeHtml(game.title) + '</span></div>\'">'
+        : '<div class="w-full h-full flex flex-col items-center justify-center p-2 bg-gradient-to-br from-slate-700 to-slate-900 text-white text-center">' +
+            '<span class="text-[10px] font-bold opacity-60">' + escapeHtml(game.platform) + '</span>' +
+            '<span class="text-xs font-black truncate max-w-full px-1 mt-1">' + escapeHtml(game.title) + '</span>' +
+          '</div>';
+
+      var badgesHtml = '';
+      if (game.play_status === 'cleared') {
+        badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">🏆 クリア済</span>';
+      } else if (game.play_status === 'playing') {
+        badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-purple-500 text-white font-black text-[9px] shadow">プレイ中</span>';
+      }
+
+      if (isOwned) {
+        if (game.complete) badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">👑 完品</span>';
+      } else if (game.hold_status === 'wanted') {
+        badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-sky-500 text-white font-black text-[9px] shadow">ほしい</span>';
+      }
+
+      if (game.rating > 0) {
+        var starStr = '★'.repeat(game.rating);
+        badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-slate-900/90 text-amber-400 font-bold text-[10px] tracking-tight shadow border border-amber-400/30">' + starStr + '</span>';
+      }
+
+      if (isOwned) {
+        if (game.rank) badgesHtml += '<span class="px-1 py-0.5 rounded bg-slate-900/80 text-white font-black text-[9px]">' + game.rank + '</span>';
+        if (game.duplicate_count > 1) badgesHtml += '<span class="px-1 py-0.5 rounded bg-blue-600 text-white font-black text-[9px]">×' + game.duplicate_count + '</span>';
+      }
+
+      var ownButtonHtml = isOwned
+        ? '<button type="button" onclick="event.stopPropagation(); quickToggleOwned(\'' + game.id + '\')" class="w-full py-1 px-2 rounded-lg font-bold text-[11px] bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-1">' +
+            '<span>✓ 所持中</span>' +
+          '</button>'
+        : '<button type="button" onclick="event.stopPropagation(); quickToggleOwned(\'' + game.id + '\')" class="w-full py-1 px-2 rounded-lg font-bold text-[11px] bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 transition flex items-center justify-center gap-1">' +
+            '<span>＋ 所持にする</span>' +
+          '</button>';
+
+      return '<div id="gameCard_' + game.id + '" onclick="openDetailModal(\'' + game.id + '\')" class="group relative bg-white rounded-2xl border ' + 
+        (isOwned ? 'border-emerald-300 ring-1 ring-emerald-500/20' : 'border-slate-200') + 
+        ' shadow-sm hover:shadow-md transition overflow-hidden cursor-pointer flex flex-col justify-between ' + 
+        (isOwned ? '' : 'jacket-unowned') + '">' +
+        
+        '<div>' +
+          '<div class="relative aspect-jacket bg-slate-100 overflow-hidden">' +
+            coverHtml +
+            '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none"></div>' +
+            '<div class="absolute top-2 left-2 z-10">' +
+              '<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-slate-900/90 text-white backdrop-blur-sm">' + escapeHtml(game.platform) + '</span>' +
+            '</div>' +
+            '<div class="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">' +
+              badgesHtml +
+            '</div>' +
+            (year ? '<div class="absolute bottom-2 left-2 z-10 text-[10px] font-black text-slate-300 drop-shadow">' + year + '年</div>' : '') +
+          '</div>' +
+
+          '<div class="p-2 sm:p-2.5 pb-1 space-y-1.5">' +
+            ownButtonHtml +
+            '<h4 class="font-black text-slate-800 text-xs leading-snug group-hover:text-emerald-600 transition line-clamp-2" title="' + escapeHtml(game.title) + '">' + 
+              escapeHtml(game.title) + 
+            '</h4>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="px-2 sm:px-2.5 pb-2 text-[10px] text-slate-400 truncate">' + escapeHtml(game.publisher) + '</div>' +
+
+      '</div>';
+    }
+
     function renderGameGridHtml(list) {
       if (list.length === 0) {
         return '<div class="col-span-full py-16 text-center text-slate-400 text-xs">条件に合致するタイトルが見つかりませんでした。</div>';
       }
+      return list.map(function(game) { return renderSingleGridCardHtml(game); }).join('');
+    }
 
-      return list.map(function(game) {
-        var isOwned = game.owned;
-        var hasCover = game.cover_url && isValidHttpUrl(game.cover_url);
-        var year = (game.release_date || '').slice(0, 4);
+    function renderSingleListRowHtml(game) {
+      var isOwned = game.owned;
+      
+      var ownButtonHtml = isOwned
+        ? '<button type="button" onclick="event.stopPropagation(); quickToggleOwned(\'' + game.id + '\')" class="px-2.5 py-1 rounded-lg font-bold text-xs bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition flex-shrink-0">' +
+            '✓ 所持' +
+          '</button>'
+        : '<button type="button" onclick="event.stopPropagation(); quickToggleOwned(\'' + game.id + '\')" class="px-2.5 py-1 rounded-lg font-bold text-xs bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200 transition flex-shrink-0">' +
+            '＋ 所持' +
+          '</button>';
 
-        var coverHtml = hasCover
-          ? '<img src="' + escapeHtml(game.cover_url) + '" loading="lazy" alt="" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.parentElement.innerHTML=\'<div class=\\\'w-full h-full flex flex-col items-center justify-center p-2 bg-gradient-to-br from-slate-700 to-slate-900 text-white text-center\\\'><span class=\\\'text-[10px] font-bold opacity-60\\\'>' + escapeHtml(game.platform) + '</span><span class=\\\'text-xs font-black truncate max-w-full px-1 mt-1\\\'>' + escapeHtml(game.title) + '</span></div>\'">'
-          : '<div class="w-full h-full flex flex-col items-center justify-center p-2 bg-gradient-to-br from-slate-700 to-slate-900 text-white text-center">' +
-              '<span class="text-[10px] font-bold opacity-60">' + escapeHtml(game.platform) + '</span>' +
-              '<span class="text-xs font-black truncate max-w-full px-1 mt-1">' + escapeHtml(game.title) + '</span>' +
-            '</div>';
-
-        var badgesHtml = '';
-        
-        if (game.play_status === 'cleared') {
-          badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">🏆 クリア済</span>';
-        } else if (game.play_status === 'playing') {
-          badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-purple-500 text-white font-black text-[9px] shadow">プレイ中</span>';
-        }
-
-        if (isOwned) {
-          if (game.complete) badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] shadow">👑 完品</span>';
-        } else if (game.hold_status === 'wanted') {
-          badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-sky-500 text-white font-black text-[9px] shadow">ほしい</span>';
-        }
-
-        if (game.rating > 0) {
-          var starStr = '★'.repeat(game.rating);
-          badgesHtml += '<span class="px-1.5 py-0.5 rounded bg-slate-900/90 text-amber-400 font-bold text-[10px] tracking-tight shadow border border-amber-400/30">' + starStr + '</span>';
-        }
-
-        if (isOwned) {
-          if (game.rank) badgesHtml += '<span class="px-1 py-0.5 rounded bg-slate-900/80 text-white font-black text-[9px]">' + game.rank + '</span>';
-          if (game.duplicate_count > 1) badgesHtml += '<span class="px-1 py-0.5 rounded bg-blue-600 text-white font-black text-[9px]">×' + game.duplicate_count + '</span>';
-        }
-
-        return '<div id="gameCard_' + game.id + '" onclick="openDetailModal(\'' + game.id + '\')" class="group relative bg-white rounded-2xl border ' + 
-          (isOwned ? 'border-emerald-300 ring-1 ring-emerald-500/20' : 'border-slate-200') + 
-          ' shadow-sm hover:shadow-md transition overflow-hidden cursor-pointer flex flex-col ' + 
-          (isOwned ? '' : 'jacket-unowned') + '">' +
-          
-          '<div class="relative aspect-jacket bg-slate-100 overflow-hidden">' +
-            coverHtml +
-            '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none"></div>' +
-            
-            '<div class="absolute top-2 left-2 z-10">' +
-              '<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-slate-900/90 text-white backdrop-blur-sm">' + escapeHtml(game.platform) + '</span>' +
+      return '<div id="gameCard_' + game.id + '" onclick="openDetailModal(\'' + game.id + '\')" class="p-2.5 sm:p-3 sm:px-4 flex items-center justify-between gap-2.5 sm:gap-3 hover:bg-slate-50 transition cursor-pointer ' + (isOwned ? '' : 'opacity-60') + '">' +
+        '<div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">' +
+          '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-slate-800 text-white flex-shrink-0">' + escapeHtml(game.platform) + '</span>' +
+          '<div class="min-w-0 flex-1">' +
+            '<div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">' +
+              '<h4 class="font-bold text-slate-800 text-xs sm:text-sm truncate">' + escapeHtml(game.title) + '</h4>' +
+              (game.play_status === 'cleared' ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">🏆 クリア済</span>' : '') +
+              (game.complete ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">👑 完品</span>' : '') +
+              (game.rating > 0 ? '<span class="text-amber-500 font-bold text-xs tracking-tight flex-shrink-0 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">' + '★'.repeat(game.rating) + '</span>' : '') +
             '</div>' +
-
-            '<div class="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">' +
-              badgesHtml +
+            '<div class="flex items-center gap-2 text-[11px] text-slate-400 truncate mt-0.5">' +
+              '<span>' + escapeHtml(game.publisher) + '</span>' +
+              '<span>•</span>' +
+              '<span>' + (game.release_date || '発売日未定') + '</span>' +
             '</div>' +
-
-            (year ? '<div class="absolute bottom-2 left-2 z-10 text-[10px] font-black text-slate-300 drop-shadow">' + year + '年</div>' : '') +
           '</div>' +
-
-          '<div class="p-2.5 flex-1 flex flex-col justify-between gap-1">' +
-            '<h4 class="font-black text-slate-800 text-xs leading-snug group-hover:text-emerald-600 transition line-clamp-2" title="' + escapeHtml(game.title) + '">' + 
-              escapeHtml(game.title) + 
-            '</h4>' +
-            '<div class="text-[10px] text-slate-400 truncate">' + escapeHtml(game.publisher) + '</div>' +
-          '</div>' +
-
-        '</div>';
-      }).join('');
+        '</div>' +
+        '<div class="flex items-center gap-2 text-xs flex-shrink-0">' +
+          (game.rank ? '<span class="px-1.5 py-0.5 rounded bg-slate-100 font-bold text-slate-600 text-[10px]">' + game.rank + '</span>' : '') +
+          ownButtonHtml +
+        '</div>' +
+      '</div>';
     }
 
     function renderGameListHtml(list) {
       if (list.length === 0) {
         return '<div class="py-16 text-center text-slate-400 text-xs">該当するタイトルがありません。</div>';
       }
-
-      return list.map(function(game) {
-        var isOwned = game.owned;
-        return '<div onclick="openDetailModal(\'' + game.id + '\')" class="p-3 sm:px-4 flex items-center justify-between gap-3 hover:bg-slate-50 transition cursor-pointer ' + (isOwned ? '' : 'opacity-60') + '">' +
-          '<div class="flex items-center gap-3 flex-1 min-w-0">' +
-            '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-slate-800 text-white flex-shrink-0">' + escapeHtml(game.platform) + '</span>' +
-            '<div class="min-w-0 flex-1">' +
-              '<div class="flex items-center gap-2 flex-wrap">' +
-                '<h4 class="font-bold text-slate-800 text-xs sm:text-sm truncate">' + escapeHtml(game.title) + '</h4>' +
-                (game.play_status === 'cleared' ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">🏆 クリア済</span>' : '') +
-                (game.complete ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[9px] flex-shrink-0">👑 完品</span>' : '') +
-                (game.rating > 0 ? '<span class="text-amber-500 font-bold text-xs tracking-tight flex-shrink-0 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">' + '★'.repeat(game.rating) + '</span>' : '') +
-              '</div>' +
-              '<div class="flex items-center gap-2 text-[11px] text-slate-400 truncate mt-0.5">' +
-                '<span>' + escapeHtml(game.publisher) + '</span>' +
-                '<span>•</span>' +
-                '<span>' + (game.release_date || '発売日未定') + '</span>' +
-              '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="flex items-center gap-3 text-xs flex-shrink-0">' +
-            (isOwned ? '<span class="font-black text-emerald-600 text-xs">所持</span>' : 
-             game.hold_status === 'wanted' ? '<span class="font-bold text-sky-500 text-xs">ほしい</span>' : '<span class="text-slate-400 text-xs">未所持</span>') +
-            (game.rank ? '<span class="px-1.5 py-0.5 rounded bg-slate-100 font-bold text-slate-600 text-[10px]">' + game.rank + '</span>' : '') +
-          '</div>' +
-        '</div>';
-      }).join('');
+      return list.map(function(game) { return renderSingleListRowHtml(game); }).join('');
     }
 
     function openDetailModal(gameId) {
@@ -2276,23 +2440,46 @@
 
     function updateSingleCardDom(gameId) {
       var card = document.getElementById('gameCard_' + gameId);
-      if (!card || !currentDetailGame) return;
-      var u = getUserState(currentDetailGame);
+      if (!card) return;
 
-      if (u.owned) {
-        card.classList.remove('jacket-unowned');
-        card.classList.add('border-emerald-300', 'ring-1', 'ring-emerald-500/20');
-        card.classList.remove('border-slate-200');
-      } else {
-        card.classList.add('jacket-unowned');
-        card.classList.remove('border-emerald-300', 'ring-1', 'ring-emerald-500/20');
-        card.classList.add('border-slate-200');
+      var game = null;
+      for (var i = 0; i < catalog.length; i++) {
+        if (catalog[i].id === gameId) {
+          game = catalog[i];
+          break;
+        }
       }
+      if (!game) return;
 
-      var img = card.querySelector('img');
-      var coverUrl = (u.cover_url || currentDetailGame.cover_url || '').trim();
-      if (img && coverUrl && isValidHttpUrl(coverUrl)) {
-        img.src = coverUrl;
+      var u = getUserState(game);
+      var mergedGame = {
+        id: game.id,
+        title: game.title,
+        kana: game.kana,
+        platform: game.platform,
+        publisher: game.publisher,
+        genre: g.genre,
+        release_date: game.release_date,
+        cover_url: u.cover_url || game.cover_url || '',
+        hold_status: u.hold_status,
+        play_status: u.play_status,
+        owned: u.owned,
+        complete: u.complete,
+        cleaned: u.cleaned,
+        battery: u.battery,
+        tested: u.tested,
+        sealed: u.sealed,
+        rank: u.rank,
+        rating: u.rating,
+        version_memo: u.version_memo,
+        price: u.price,
+        duplicate_count: u.duplicate_count
+      };
+
+      if (currentViewMode === 'list') {
+        card.outerHTML = renderSingleListRowHtml(mergedGame);
+      } else {
+        card.outerHTML = renderSingleGridCardHtml(mergedGame);
       }
     }
 
@@ -2522,6 +2709,7 @@
                               (pct >= 50) ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-emerald-500';
 
         html += '<div class="' + cardBorder + ' p-3.5 rounded-2xl transition space-y-2.5">' +
+          
           '<div class="flex items-center justify-between flex-wrap gap-1">' +
             '<div class="flex items-center gap-2 min-w-0">' +
               '<span class="px-2 py-0.5 rounded text-[11px] font-black ' + (isPerfect ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-900 text-white') + ' flex-shrink-0">' + 
@@ -2700,7 +2888,7 @@
               '<button type="button" onclick="deletePlayPost(\'' + p.id + '\')" class="text-slate-300 hover:text-red-500 text-xs">✕</button>' +
             '</div>' +
           '</div>' +
-          '<p class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">' + escapeHtml(p.content) + '</p>' +
+          '<p class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed pl-0.5">' + escapeHtml(p.content) + '</p>' +
         '</div>';
       }).join('');
     }
@@ -2820,7 +3008,7 @@
               var safeLink = isValidHttpUrl(item.link) ? item.link : '#';
               var thumb = extractThumbnailFromItem(item);
               var thumbHtml = thumb 
-                ? '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0"><img src="' + escapeHtml(thumb) + '" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.remove()"></div>'
+                ? '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0"><img src="' + escapeHtml(thumb) + '" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.remove()">' + '</div>'
                 : '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-800 rounded-xl flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">GAME NEWS</div>';
 
               return '<a href="' + escapeHtml(safeLink) + '" target="_blank" rel="noopener noreferrer" class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex items-start gap-3 group">' +
@@ -2851,8 +3039,8 @@
       var tNews = document.getElementById('tabNavNews');
       var tCal = document.getElementById('tabNavCalendar');
 
-      var activeClass = 'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-slate-900 text-white shadow-sm transition';
-      var inactiveClass = 'flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition';
+      var activeClass = 'flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition';
+      var inactiveClass = 'flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition';
 
       if (sCat) sCat.classList.toggle('hidden', tab !== 'catalog');
       if (sPosts) sPosts.classList.toggle('hidden', tab !== 'posts');
@@ -3040,6 +3228,7 @@
       if (catalog.length > 0) {
         updatePlatformSidebarPills(catalog);
         updateGenreSidebarPills(catalog);
+        updateSyllabarySidebarPills(catalog);
         applyFilters();
       }
       renderPlayPosts();
