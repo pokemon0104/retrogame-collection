@@ -724,6 +724,34 @@
             </div>
           </div>
 
+          <!-- カスタムリンク（任意URL 3件） -->
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-400">カスタムリンク (NotebookLM / 攻略サイト等)</span>
+              <span class="text-[10px] text-slate-400">最大3件</span>
+            </div>
+            <div class="space-y-2" id="detailCustomLinksContainer">
+              <!-- リンク 1 -->
+              <div class="flex items-center gap-2">
+                <input type="text" id="detailLinkTitle_0" onchange="saveDetailCustomLink(0)" placeholder="名称 (例: NotebookLM)" class="w-1/3 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+                <input type="url" id="detailLinkUrl_0" onchange="saveDetailCustomLink(0)" placeholder="https://..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+                <a id="detailLinkBtn_0" href="#" target="_blank" rel="noopener noreferrer" class="hidden px-2.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex-shrink-0">開く ↗</a>
+              </div>
+              <!-- リンク 2 -->
+              <div class="flex items-center gap-2">
+                <input type="text" id="detailLinkTitle_1" onchange="saveDetailCustomLink(1)" placeholder="名称 (例: 攻略チャート)" class="w-1/3 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+                <input type="url" id="detailLinkUrl_1" onchange="saveDetailCustomLink(1)" placeholder="https://..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+                <a id="detailLinkBtn_1" href="#" target="_blank" rel="noopener noreferrer" class="hidden px-2.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex-shrink-0">開く ↗</a>
+              </div>
+              <!-- リンク 3 -->
+              <div class="flex items-center gap-2">
+                <input type="text" id="detailLinkTitle_2" onchange="saveDetailCustomLink(2)" placeholder="名称 (例: 設定資料・動画)" class="w-1/3 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+                <input type="url" id="detailLinkUrl_2" onchange="saveDetailCustomLink(2)" placeholder="https://..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+                <a id="detailLinkBtn_2" href="#" target="_blank" rel="noopener noreferrer" class="hidden px-2.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex-shrink-0">開く ↗</a>
+              </div>
+            </div>
+          </div>
+
           <!-- 外部参照ボタン -->
           <div class="grid grid-cols-3 gap-2">
             <a id="detailWikiBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-center transition flex items-center justify-center gap-1 shadow-sm">
@@ -1029,6 +1057,11 @@
         var isOwned = (hold === 'owned');
         var isComp = isOwned && Boolean(state.box && state.manual && state.postcard && state.obi && state.bonus);
 
+        var customLinks = (state.custom_links && Array.isArray(state.custom_links)) ? state.custom_links : [];
+        while (customLinks.length < 3) {
+          customLinks.push({ title: '', url: '' });
+        }
+
         return {
           hold_status: hold,
           play_status: play,
@@ -1052,7 +1085,8 @@
           location: state.location || '',
           duplicate_count: parseInt(state.duplicate_count, 10) || 1,
           memo: state.memo || '',
-          cover_url: state.cover_url || game.cover_url || ''
+          cover_url: state.cover_url || game.cover_url || '',
+          custom_links: customLinks
         };
       }
       return {
@@ -1078,7 +1112,12 @@
         location: '',
         duplicate_count: 1,
         memo: '',
-        cover_url: game.cover_url || ''
+        cover_url: game.cover_url || '',
+        custom_links: [
+          { title: '', url: '' },
+          { title: '', url: '' },
+          { title: '', url: '' }
+        ]
       };
     }
 
@@ -1226,12 +1265,7 @@
 
       saveUserStates();
 
-      var q = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').trim();
-      if (q) {
-        updateSingleCardDom(game.id);
-      } else {
-        applyFilters();
-      }
+      updateSingleCardDom(game.id);
 
       showToast(nextHold === 'owned' ? ('「' + game.title + '」を所持に登録しました') : ('「' + game.title + '」の所持を解除しました'), nextHold === 'owned' ? 'success' : 'info');
     }
@@ -2050,6 +2084,26 @@
         }
       }
 
+      // カスタムリンク入力欄の初期化
+      for (var lIdx = 0; lIdx < 3; lIdx++) {
+        var lData = (u.custom_links && u.custom_links[lIdx]) ? u.custom_links[lIdx] : { title: '', url: '' };
+        var tInput = document.getElementById('detailLinkTitle_' + lIdx);
+        var uInput = document.getElementById('detailLinkUrl_' + lIdx);
+        var btn = document.getElementById('detailLinkBtn_' + lIdx);
+
+        if (tInput) tInput.value = lData.title || '';
+        if (uInput) uInput.value = lData.url || '';
+        if (btn) {
+          if (lData.url && isValidHttpUrl(lData.url)) {
+            btn.href = lData.url;
+            btn.classList.remove('hidden');
+          } else {
+            btn.href = '#';
+            btn.classList.add('hidden');
+          }
+        }
+      }
+
       var quickPostInput = document.getElementById('detailQuickPostInput');
       if (quickPostInput) quickPostInput.value = '';
       
@@ -2390,6 +2444,48 @@
       detailModalDirty = true;
     }
 
+    function saveDetailCustomLink(index) {
+      if (!currentDetailGame) return;
+      var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
+      if (!userStates[k]) userStates[k] = getUserState(currentDetailGame);
+
+      if (!Array.isArray(userStates[k].custom_links)) {
+        userStates[k].custom_links = [
+          { title: '', url: '' },
+          { title: '', url: '' },
+          { title: '', url: '' }
+        ];
+      }
+      while (userStates[k].custom_links.length < 3) {
+        userStates[k].custom_links.push({ title: '', url: '' });
+      }
+
+      var titleInput = document.getElementById('detailLinkTitle_' + index);
+      var urlInput = document.getElementById('detailLinkUrl_' + index);
+      var btn = document.getElementById('detailLinkBtn_' + index);
+
+      var rawTitle = titleInput ? titleInput.value.trim() : '';
+      var rawUrl = urlInput ? urlInput.value.trim() : '';
+
+      userStates[k].custom_links[index] = {
+        title: rawTitle,
+        url: rawUrl
+      };
+
+      saveUserStates();
+      detailModalDirty = true;
+
+      if (btn) {
+        if (rawUrl && isValidHttpUrl(rawUrl)) {
+          btn.href = rawUrl;
+          btn.classList.remove('hidden');
+        } else {
+          btn.href = '#';
+          btn.classList.add('hidden');
+        }
+      }
+    }
+
     function adjustDuplicateCount(delta) {
       if (!currentDetailGame) return;
       var k = makeStateKey(currentDetailGame.title, currentDetailGame.platform);
@@ -2503,635 +2599,6 @@
     }
 
     function deleteDetailGamePost(postId) {
-      playPosts = playPosts.filter(function(p) { return p.id !== postId; });
-      savePlayPosts();
-      renderDetailGamePosts();
-      renderPlayPosts();
-      showToast('投稿を削除しました', 'info');
-    }
-
-    // ★ ニュースフィードの取得（最新順ソート ＆ ページング対応）
-    function fetchNewsFeed(force) {
-      var container = document.getElementById('newsContainer');
-      var refreshIcon = document.getElementById('newsRefreshIcon');
-      var moreContainer = document.getElementById('loadMoreNewsContainer');
-      if (!container) return;
-      if (!force && allNewsList.length > 0) {
-        renderNewsItems();
-        return;
-      }
-
-      if (refreshIcon) refreshIcon.classList.add('animate-spin');
-      container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">最新ニュースをリアルタイム取得中...</div>';
-      if (moreContainer) moreContainer.classList.add('hidden');
-
-      var targetRssUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent('(レトロゲーム OR ファミコン OR "スーパーファミコン" OR "メガドライブ" OR "PCエンジン" OR "ゲームボーイ" OR "セガサターン" OR "アーケードアーカイブス" OR "アケアカ") -PS5 -"PlayStation 5" -"Xbox Series" -スマホゲーム -ガチャ') + '&hl=ja&gl=JP&ceid=JP:ja';
-      if (currentNewsSource === 'denfaminicogamer') {
-        targetRssUrl = 'https://news.denfaminicogamer.jp/feed';
-      } else if (currentNewsSource === 'automaton') {
-        targetRssUrl = 'https://automaton-media.com/feed/';
-      }
-
-      var cacheBuster = Date.now();
-      var proxyUrls = [
-        'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetRssUrl + (targetRssUrl.indexOf('?') === -1 ? '?_cb=' : '&_cb=') + cacheBuster),
-        'https://corsproxy.io/?' + encodeURIComponent(targetRssUrl + (targetRssUrl.indexOf('?') === -1 ? '?_cb=' : '&_cb=') + cacheBuster)
-      ];
-
-      function tryFetchRss(idx) {
-        if (idx >= proxyUrls.length) {
-          fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(targetRssUrl) + '&_cb=' + cacheBuster)
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-              if (data && data.items && data.items.length > 0) {
-                allNewsList = data.items.map(function(item) {
-                  var thumb = item.thumbnail || (item.enclosure && item.enclosure.link) || extractThumbnailFromHtml(item.content || item.description);
-                  var parsedTitle = item.title || '';
-                  var sourceName = (currentNewsSource === 'denfaminicogamer') ? '電ファミニコゲーマー' :
-                                   (currentNewsSource === 'automaton') ? 'AUTOMATON' : 'Googleニュース';
-
-                  if (currentNewsSource === 'google' && parsedTitle.lastIndexOf(' - ') !== -1) {
-                    var parts = parsedTitle.split(' - ');
-                    sourceName = parts.pop();
-                    parsedTitle = parts.join(' - ');
-                  }
-
-                  return {
-                    title: parsedTitle,
-                    source: sourceName,
-                    link: item.link,
-                    pubDate: item.pubDate,
-                    thumbnail: thumb
-                  };
-                });
-
-                allNewsList.sort(function(a, b) {
-                  return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
-                });
-
-                newsDisplayLimit = 10;
-                renderNewsItems();
-              } else {
-                throw new Error();
-              }
-            })
-            .catch(function() {
-              container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">ニュースの取得に失敗しました。「更新」ボタンを再度お試しください。</div>';
-            })
-            .finally(function() {
-              if (refreshIcon) refreshIcon.classList.remove('animate-spin');
-            });
-          return;
-        }
-
-        fetch(proxyUrls[idx], { cache: 'no-store' })
-          .then(function(res) {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.text();
-          })
-          .then(function(xmlText) {
-            var parser = new DOMParser();
-            var xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-            var items = xmlDoc.querySelectorAll('item');
-
-            if (!items || items.length === 0) throw new Error('XML empty');
-
-            var newsList = [];
-            for (var i = 0; i < items.length; i++) {
-              var it = items[i];
-              var rawTitle = it.querySelector('title') ? it.querySelector('title').textContent : '';
-              var link = it.querySelector('link') ? it.querySelector('link').textContent : '#';
-              var pubDate = it.querySelector('pubDate') ? it.querySelector('pubDate').textContent : '';
-              var desc = it.querySelector('description') ? it.querySelector('description').textContent : '';
-              var content = it.getElementsByTagNameNS('*', 'encoded').length > 0 ? it.getElementsByTagNameNS('*', 'encoded')[0].textContent : '';
-              
-              var thumb = extractThumbnailFromHtml(content) || extractThumbnailFromHtml(desc);
-              if (!thumb && it.querySelector('enclosure')) {
-                thumb = it.querySelector('enclosure').getAttribute('url') || '';
-              }
-
-              var title = rawTitle;
-              var sourceName = (currentNewsSource === 'denfaminicogamer') ? '電ファミニコゲーマー' :
-                               (currentNewsSource === 'automaton') ? 'AUTOMATON' : 'Googleニュース';
-
-              if (currentNewsSource === 'google') {
-                var sourceTag = it.querySelector('source');
-                if (sourceTag && sourceTag.textContent) {
-                  sourceName = sourceTag.textContent.trim();
-                } else if (rawTitle.lastIndexOf(' - ') !== -1) {
-                  var parts = rawTitle.split(' - ');
-                  sourceName = parts.pop();
-                  title = parts.join(' - ');
-                }
-              }
-
-              newsList.push({
-                title: title,
-                source: sourceName,
-                link: link,
-                pubDate: pubDate,
-                thumbnail: thumb
-              });
-            }
-
-            newsList.sort(function(a, b) {
-              return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
-            });
-
-            allNewsList = newsList;
-            newsDisplayLimit = 10;
-            renderNewsItems();
-            if (refreshIcon) refreshIcon.classList.remove('animate-spin');
-          })
-          .catch(function() {
-            tryFetchRss(idx + 1);
-          });
-      }
-
-      tryFetchRss(0);
-    }
-
-    // ★ ニュース描画（ページング制限と「もっと見る」ボタン表示制御）
-    function renderNewsItems() {
-      var container = document.getElementById('newsContainer');
-      var moreContainer = document.getElementById('loadMoreNewsContainer');
-      if (!container) return;
-
-      var currentBatch = allNewsList.slice(0, newsDisplayLimit);
-
-      if (currentBatch.length === 0) {
-        container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">ニュース記事が見つかりませんでした。</div>';
-        if (moreContainer) moreContainer.classList.add('hidden');
-        return;
-      }
-
-      container.innerHTML = currentBatch.map(function(item) {
-        var safeLink = isValidHttpUrl(item.link) ? item.link : '#';
-        var formattedDate = formatNewsDate(item.pubDate);
-        var thumbHtml = item.thumbnail && isValidHttpUrl(item.thumbnail)
-          ? '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0"><img src="' + escapeHtml(item.thumbnail) + '" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.remove()"></div>'
-          : '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-800 rounded-xl flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">GAME NEWS</div>';
-
-        return '<a href="' + escapeHtml(safeLink) + '" target="_blank" rel="noopener noreferrer" class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex items-start gap-3 group">' +
-          thumbHtml +
-          '<div class="flex-1 min-w-0 flex flex-col justify-between h-24 sm:h-28">' +
-            '<h4 class="font-black text-slate-800 text-xs sm:text-sm group-hover:text-emerald-600 transition line-clamp-3 leading-snug">' + escapeHtml(item.title) + '</h4>' +
-            '<div class="flex items-center justify-between text-[10px] text-slate-400 mt-1 font-medium">' +
-              '<span class="truncate max-w-[120px] text-slate-500 font-bold">' + escapeHtml(item.source || '') + '</span>' +
-              '<span>' + escapeHtml(formattedDate) + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</a>';
-      }).join('');
-
-      if (moreContainer) {
-        moreContainer.classList.toggle('hidden', newsDisplayLimit >= allNewsList.length);
-      }
-    }
-
-    // ★ 「もっと見る」押下時
-    function loadMoreNews() {
-      newsDisplayLimit += 10;
-      renderNewsItems();
-    }
-
-    function switchNewsSource(source) {
-      currentNewsSource = source;
-      ['google', 'denfaminicogamer', 'automaton'].forEach(function(src) {
-        var btn = document.getElementById('btnNewsSrc_' + src);
-        if (btn) {
-          btn.className = (src === source) ? 'px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-900 text-white transition' : 'px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
-        }
-      });
-      fetchNewsFeed(true);
-    }
-
-    function extractThumbnailFromHtml(html) {
-      if (!html) return '';
-      var m = html.match(/<img[^>]+src=["'](https?:\/\/[^"']+)["']/i);
-      return (m && m[1]) ? m[1] : '';
-    }
-
-    function updateSingleCardDom(gameId) {
-      var card = document.getElementById('gameCard_' + gameId);
-      if (!card) return;
-
-      var game = null;
-      for (var i = 0; i < catalog.length; i++) {
-        if (catalog[i].id === gameId) {
-          game = catalog[i];
-          break;
-        }
-      }
-      if (!game) return;
-
-      var u = getUserState(game);
-      var mergedGame = {
-        id: game.id,
-        title: game.title,
-        kana: game.kana,
-        platform: game.platform,
-        publisher: game.publisher,
-        genre: game.genre,
-        release_date: game.release_date,
-        cover_url: u.cover_url || game.cover_url || '',
-        hold_status: u.hold_status,
-        play_status: u.play_status,
-        owned: u.owned,
-        complete: u.complete,
-        cleaned: u.cleaned,
-        battery: u.battery,
-        tested: u.tested,
-        sealed: u.sealed,
-        rank: u.rank,
-        rating: u.rating,
-        version_memo: u.version_memo,
-        price: u.price,
-        duplicate_count: u.duplicate_count
-      };
-
-      if (currentViewMode === 'list') {
-        card.outerHTML = renderSingleListRowHtml(mergedGame);
-      } else {
-        card.outerHTML = renderSingleGridCardHtml(mergedGame);
-      }
-    }
-
-    var currentProgressLevel = 1;
-    var currentProgressCategory = null;
-
-    function getCollectorRank(rate, isCompleteAll) {
-      if (isCompleteAll || rate >= 100) {
-        return { rank: 'LEGEND', label: '🏆 完全制覇 (LEGEND)', color: 'text-amber-500 bg-amber-50 border-amber-300', icon: '🏆', celebrate: true };
-      } else if (rate >= 75) {
-        return { rank: 'MASTER', label: '👑 マスター (あと少し!)', color: 'text-purple-600 bg-purple-50 border-purple-200', icon: '👑' };
-      } else if (rate >= 50) {
-        return { rank: 'GOLD', label: '🥇 ゴールドコレクター', color: 'text-amber-600 bg-amber-50/70 border-amber-200', icon: '🥇' };
-      } else if (rate >= 25) {
-        return { rank: 'SILVER', label: '🥈 シルバーコレクター', color: 'text-slate-700 bg-slate-100 border-slate-300', icon: '🥈' };
-      } else if (rate > 0) {
-        return { rank: 'BRONZE', label: '🥉 チャレンジャー', color: 'text-emerald-700 bg-emerald-50 border-emerald-200', icon: '🥉' };
-      } else {
-        return { rank: 'NONE', label: '未踏の領域', color: 'text-slate-400 bg-slate-50 border-slate-200', icon: '🌱' };
-      }
-    }
-
-    function openProgressModal() {
-      showProgressTopLevel();
-      var modal = document.getElementById('progressModal');
-      if (modal) modal.classList.remove('hidden');
-    }
-
-    function closeProgressModal() {
-      var modal = document.getElementById('progressModal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function showProgressTopLevel() {
-      currentProgressLevel = 1;
-      currentProgressCategory = null;
-
-      var backBtn = document.getElementById('progressBackBtn');
-      if (backBtn) backBtn.classList.add('hidden');
-
-      var titleEl = document.getElementById('progressModalTitle');
-      var subEl = document.getElementById('progressModalSubtitle');
-      if (titleEl) titleEl.textContent = '達成率・コンプリート状況';
-      if (subEl) subEl.textContent = '確認したい達成率のカテゴリを選択してください';
-
-      var body = document.getElementById('progressModalBody') || document.getElementById('progressListContainer');
-      if (!body) return;
-
-      var totalGames = catalog.length;
-      if (totalGames === 0) {
-        body.innerHTML = '<div class="py-12 text-center text-slate-400 text-xs font-bold">マスターカタログを読み込み中です。少々お待ちください...</div>';
-        return;
-      }
-
-      var totalOwned = 0;
-      var totalComplete = 0;
-      var perfectCategoriesCount = 0;
-
-      var platformCounts = {};
-      var genreCounts = {};
-      var publisherCounts = {};
-
-      for (var i = 0; i < totalGames; i++) {
-        var g = catalog[i];
-        var u = getUserState(g);
-        var isOwn = u.owned;
-        if (isOwn) {
-          totalOwned++;
-          if (u.complete) totalComplete++;
-        }
-
-        var p = g.platform || 'OTHER';
-        if (!platformCounts[p]) platformCounts[p] = { total: 0, owned: 0 };
-        platformCounts[p].total++;
-        if (isOwn) platformCounts[p].owned++;
-
-        var gen = g.genre || '未分類';
-        if (!genreCounts[gen]) genreCounts[gen] = { total: 0, owned: 0 };
-        genreCounts[gen].total++;
-        if (isOwn) genreCounts[gen].owned++;
-
-        var pub = g.publisher || '不明';
-        if (!publisherCounts[pub]) publisherCounts[pub] = { total: 0, owned: 0 };
-        publisherCounts[pub].total++;
-        if (isOwn) publisherCounts[pub].owned++;
-      }
-
-      Object.keys(platformCounts).forEach(function(k) {
-        if (platformCounts[k].total > 0 && platformCounts[k].owned === platformCounts[k].total) perfectCategoriesCount++;
-      });
-
-      var overallRate = totalGames > 0 ? (Math.round((totalOwned / totalGames) * 1000) / 10).toFixed(1) : '0.0';
-      var overallRank = getCollectorRank(parseFloat(overallRate), false);
-
-      body.innerHTML = 
-        '<div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-md flex items-center justify-between gap-3 border border-slate-700">' +
-          '<div class="space-y-1">' +
-            '<div class="flex items-center gap-2">' +
-              '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-amber-400 text-slate-950 uppercase tracking-wide shadow">COLLECTOR RANK</span>' +
-              '<span class="text-xs text-slate-300 font-bold">' + overallRank.label + '</span>' +
-            '</div>' +
-            '<h4 class="text-lg sm:text-xl font-black tracking-tight flex items-center gap-1.5">' +
-              '<span>総合収集率:</span> <span class="text-emerald-400">' + overallRate + '%</span>' +
-              '<span class="text-xs font-normal text-slate-400 ml-1">(' + totalOwned + ' / ' + totalGames + ' 本)</span>' +
-            '</h4>' +
-            '<p class="text-[11px] text-slate-300 flex items-center gap-2">' +
-              '<span>👑 箱説完品: <strong class="text-amber-300">' + totalComplete + '本</strong></span>' +
-              (perfectCategoriesCount > 0 ? '<span class="text-amber-400 font-black">・ 🏆 ' + perfectCategoriesCount + 'ハード完全制覇！</span>' : '') +
-            '</p>' +
-          '</div>' +
-          '<div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-3xl sm:text-4xl flex-shrink-0 shadow-inner">' +
-            overallRank.icon +
-          '</div>' +
-        '</div>' +
-
-        '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">' +
-          '<div onclick="showProgressDetail(\'platform\')" class="group p-4 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-emerald-500 rounded-2xl shadow-sm hover:shadow transition cursor-pointer flex flex-col justify-between space-y-3">' +
-            '<div class="flex items-center justify-between">' +
-              '<span class="text-2xl p-2 rounded-xl bg-emerald-50 text-emerald-600">🎮</span>' +
-              '<span class="text-[11px] font-bold text-slate-400 group-hover:text-emerald-600 transition">詳細へ ➔</span>' +
-            '</div>' +
-            '<div>' +
-              '<h4 class="font-black text-slate-800 text-sm group-hover:text-emerald-600 transition">ハード別 達成率</h4>' +
-              '<p class="text-[11px] text-slate-500 mt-0.5">FC、SFC、GB、MD、PSなど機種ごとのコンプ率</p>' +
-            '</div>' +
-            '<div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-600">' +
-              '<span>登録機種:</span>' +
-              '<span class="text-emerald-600">' + Object.keys(platformCounts).length + ' 機種</span>' +
-            '</div>' +
-          '</div>' +
-
-          '<div onclick="showProgressDetail(\'genre\')" class="group p-4 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-sky-500 rounded-2xl shadow-sm hover:shadow transition cursor-pointer flex flex-col justify-between space-y-3">' +
-            '<div class="flex items-center justify-between">' +
-              '<span class="text-2xl p-2 rounded-xl bg-sky-50 text-sky-600">🏷️</span>' +
-              '<span class="text-[11px] font-bold text-slate-400 group-hover:text-sky-600 transition">詳細へ ➔</span>' +
-            '</div>' +
-            '<div>' +
-              '<h4 class="font-black text-slate-800 text-sm group-hover:text-sky-600 transition">ジャンル別 達成率</h4>' +
-              '<p class="text-[11px] text-slate-500 mt-0.5">RPG、アクション、STGなど得意ジャンルの制覇率</p>' +
-            '</div>' +
-            '<div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-600">' +
-              '<span>分類ジャンル:</span>' +
-              '<span class="text-sky-600">' + Object.keys(genreCounts).length + ' 分類</span>' +
-            '</div>' +
-          '</div>' +
-
-          '<div onclick="showProgressDetail(\'publisher\')" class="group p-4 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-purple-500 rounded-2xl shadow-sm hover:shadow transition cursor-pointer flex flex-col justify-between space-y-3">' +
-            '<div class="flex items-center justify-between">' +
-              '<span class="text-2xl p-2 rounded-xl bg-purple-50 text-purple-600">🏢</span>' +
-              '<span class="text-[11px] font-bold text-slate-400 group-hover:text-purple-600 transition">詳細へ ➔</span>' +
-            '</div>' +
-            '<div>' +
-              '<h4 class="font-black text-slate-800 text-sm group-hover:text-purple-600 transition">メーカー別 達成率</h4>' +
-              '<p class="text-[11px] text-slate-500 mt-0.5">任天堂、スクウェア、エニックス、ナムコ等</p>' +
-            '</div>' +
-            '<div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-600">' +
-              '<span>登録企業数:</span>' +
-              '<span class="text-purple-600">' + Object.keys(publisherCounts).length + ' 社</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-    }
-
-    function showProgressDetail(category) {
-      currentProgressLevel = 2;
-      currentProgressCategory = category;
-
-      var backBtn = document.getElementById('progressBackBtn');
-      if (backBtn) backBtn.classList.remove('hidden');
-
-      var titleEl = document.getElementById('progressModalTitle');
-      var subEl = document.getElementById('progressModalSubtitle');
-
-      if (category === 'platform') {
-        if (titleEl) titleEl.textContent = 'ハード別 達成率';
-        if (subEl) subEl.textContent = '各機種ごとの所持率および箱説完品率の内訳';
-      } else if (category === 'genre') {
-        if (titleEl) titleEl.textContent = 'ジャンル別 達成率';
-        if (subEl) subEl.textContent = 'RPG、アクション、STGなど各ジャンルの所持率・完品率';
-      } else if (category === 'publisher') {
-        if (titleEl) titleEl.textContent = 'メーカー別 達成率';
-        if (subEl) subEl.textContent = '任天堂、スクウェア、エニックスなど企業別の所持率・完品率';
-      }
-
-      var groups = {};
-      for (var i = 0; i < catalog.length; i++) {
-        var g = catalog[i];
-        var key = (category === 'platform') ? (g.platform || 'OTHER') :
-                  (category === 'genre') ? (g.genre || 'その他') :
-                  (g.publisher || 'その他');
-
-        if (!groups[key]) groups[key] = { name: key, total: 0, owned: 0, complete: 0, cost: 0 };
-        groups[key].total++;
-
-        var u = getUserState(g);
-        if (u.owned) {
-          groups[key].owned++;
-          if (u.complete) groups[key].complete++;
-          groups[key].cost += (u.price || 0);
-        }
-      }
-
-      var list = Object.keys(groups).map(function(k) { return groups[k]; });
-      
-      list.sort(function(a, b) {
-        var rateA = a.total > 0 ? (a.owned / a.total) : 0;
-        var rateB = b.total > 0 ? (b.owned / b.total) : 0;
-        if (rateB !== rateA) return rateB - rateA;
-        return b.total - a.total;
-      });
-
-      var body = document.getElementById('progressModalBody') || document.getElementById('progressListContainer');
-      if (!body) return;
-
-      var html = '<div class="space-y-2.5">';
-
-      list.forEach(function(item) {
-        var pct = item.total > 0 ? Math.round((item.owned / item.total) * 1000) / 10 : 0;
-        var compPct = item.owned > 0 ? Math.round((item.complete / item.owned) * 1000) / 10 : 0;
-        var remain = Math.max(0, item.total - item.owned);
-        var rankInfo = getCollectorRank(pct, item.total > 0 && remain === 0);
-
-        var isPerfect = (item.total > 0 && remain === 0);
-        var cardBorder = isPerfect ? 'border-2 border-amber-400 bg-amber-50/40 shadow' : 'border border-slate-200 bg-white';
-        var progressGradient = isPerfect ? 'bg-gradient-to-r from-amber-400 to-yellow-300 animate-pulse' :
-                              (pct >= 75) ? 'bg-gradient-to-r from-purple-500 to-indigo-500' :
-                              (pct >= 50) ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-emerald-500';
-
-        html += '<div class="' + cardBorder + ' p-3.5 rounded-2xl transition space-y-2.5">' +
-          '<div class="flex items-center justify-between flex-wrap gap-1">' +
-            '<div class="flex items-center gap-2 min-w-0">' +
-              '<span class="px-2 py-0.5 rounded text-[11px] font-black ' + (isPerfect ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-900 text-white') + ' flex-shrink-0">' + 
-                escapeHtml(item.name) + 
-              '</span>' +
-              '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ' + rankInfo.color + '">' + rankInfo.label + '</span>' +
-            '</div>' +
-            '<div class="flex items-center gap-2 flex-shrink-0">' +
-              '<span class="font-black text-sm sm:text-base ' + (isPerfect ? 'text-amber-600 font-extrabold' : 'text-slate-800') + '">' + pct + '%</span>' +
-              '<span class="text-xs text-slate-400">(' + item.owned + ' / ' + item.total + ' 本)</span>' +
-            '</div>' +
-          '</div>' +
-
-          '<div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-200/60">' +
-            '<div class="' + progressGradient + ' h-full rounded-full transition-all duration-700" style="width: ' + pct + '%"></div>' +
-          '</div>' +
-
-          '<div class="flex items-center justify-between text-[11px] pt-0.5 flex-wrap gap-2">' +
-            '<div class="flex items-center gap-3 text-slate-500">' +
-              '<span>👑 箱説完品: <strong class="text-amber-600 font-bold">' + item.complete + '本</strong> (' + compPct + '%)</span>' +
-              (item.cost > 0 ? '<span class="hidden sm:inline text-slate-400">投資: ¥' + item.cost.toLocaleString() + '</span>' : '') +
-            '</div>' +
-            '<div class="flex items-center gap-2">' +
-              (remain > 0 
-                ? '<span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">あと ' + remain + ' 本で制覇！</span>' +
-                  '<button type="button" onclick="filterUnownedFromProgress(\'' + category + '\', \'' + escapeHtml(item.name).replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-[10px] transition shadow-sm flex items-center gap-1">' +
-                    '<span>未所持を探す</span> ➔' +
-                  '</button>'
-                : '<span class="text-[10px] font-black text-amber-600 bg-amber-100 px-2 py-0.5 rounded-md shadow-sm flex items-center gap-1">🏆 COMPLETE! 制覇達成</span>'
-              ) +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      });
-
-      html += '</div>';
-      body.innerHTML = html;
-    }
-
-    function filterUnownedFromProgress(category, value) {
-      closeProgressModal();
-      switchNavTab('catalog');
-      resetAllFilters();
-
-      if (category === 'platform') {
-        setQuickPlatform(value);
-      } else {
-        var searchInput = document.getElementById('searchInput');
-        if (searchInput) searchInput.value = value;
-      }
-
-      setHoldFilter('unowned');
-      showToast('「' + value + '」の未所持タイトルを絞り込みました', 'info');
-    }
-
-    function searchPostGames(query) {
-      var box = document.getElementById('postGameSuggestBox');
-      if (!box) return;
-      var q = (query || '').trim().toLowerCase();
-
-      var matches = [];
-      for (var i = 0; i < catalog.length; i++) {
-        var g = catalog[i];
-        if (!q || g.title.toLowerCase().indexOf(q) !== -1 || g.platform.toLowerCase().indexOf(q) !== -1) {
-          matches.push(g);
-          if (matches.length >= 12) break;
-        }
-      }
-
-      if (matches.length === 0) {
-        box.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">見つかりませんでした</div>';
-      } else {
-        box.innerHTML = matches.map(function(gm) {
-          return '<div onclick="selectPostGame(\'' + gm.id + '\')" class="p-2.5 hover:bg-emerald-50 cursor-pointer flex items-center justify-between gap-2 transition">' +
-            '<div class="flex items-center gap-2 truncate">' +
-              '<span class="px-1.5 py-0.5 rounded bg-slate-800 text-white text-[10px] font-bold flex-shrink-0">' + escapeHtml(gm.platform) + '</span>' +
-              '<span class="text-xs font-bold text-slate-800 truncate">' + escapeHtml(gm.title) + '</span>' +
-            '</div>' +
-            '<span class="text-[10px] text-slate-400 flex-shrink-0">' + (gm.release_date || '') + '</span>' +
-          '</div>';
-        }).join('');
-      }
-      box.classList.remove('hidden');
-    }
-
-    function selectPostGame(gameId) {
-      var game = null;
-      for (var i = 0; i < catalog.length; i++) {
-        if (catalog[i].id === gameId) {
-          game = catalog[i];
-          break;
-        }
-      }
-      if (!game) return;
-
-      document.getElementById('postGameId').value = game.id;
-      document.getElementById('postGameSelectedHard').textContent = game.platform;
-      document.getElementById('postGameSelectedTitle').textContent = game.title;
-
-      document.getElementById('postGameSelectedCard').classList.remove('hidden');
-      document.getElementById('postGameSearchInput').classList.add('hidden');
-      document.getElementById('postGameSuggestBox').classList.add('hidden');
-    }
-
-    function clearSelectedPostGame() {
-      document.getElementById('postGameId').value = '';
-      document.getElementById('postGameSelectedCard').classList.add('hidden');
-      var searchInput = document.getElementById('postGameSearchInput');
-      searchInput.classList.remove('hidden');
-      searchInput.value = '';
-      searchInput.focus();
-    }
-
-    function handlePostSubmit(e) {
-      e.preventDefault();
-      var gameId = document.getElementById('postGameId').value;
-      var tag = document.getElementById('postTagInput').value.trim();
-      var content = document.getElementById('postContentInput').value.trim();
-
-      var game = null;
-      for (var i = 0; i < catalog.length; i++) {
-        if (catalog[i].id === gameId) {
-          game = catalog[i];
-          break;
-        }
-      }
-      if (!game || !content) return;
-
-      var newPost = {
-        id: 'post_' + Date.now(),
-        game_id: game.id,
-        game_title: game.title,
-        game_platform: game.platform,
-        tag: tag || '記録',
-        content: content,
-        created_at: new Date().toISOString()
-      };
-
-      playPosts.unshift(newPost);
-      savePlayPosts();
-
-      document.getElementById('postContentInput').value = '';
-      document.getElementById('postTagInput').value = '';
-      clearSelectedPostGame();
-      renderPlayPosts();
-      showToast('つぶやきを投稿しました', 'success');
-    }
-
-    function deletePlayPost(postId) {
       playPosts = playPosts.filter(function(p) { return p.id !== postId; });
       savePlayPosts();
       renderDetailGamePosts();
