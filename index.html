@@ -323,7 +323,7 @@
             </div>
           </div>
 
-          <!-- ③ ★ 五十音別クイック選択 -->
+          <!-- ③ 五十音別クイック選択 -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-bold text-slate-400">五十音</span>
@@ -443,15 +443,28 @@
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 class="text-sm font-black text-slate-800">レトロゲーム・最新ニュース</h3>
-          <p class="text-xs text-slate-400">大手メディアのレトロゲームトピックを画像付きで配信</p>
+          <p class="text-xs text-slate-400">大手メディアの最新記事をリアルタイム配信</p>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button type="button" onclick="switchNewsSource('denfaminicogamer')" id="btnNewsSrc_denfaminicogamer" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-900 text-white transition">電ファミ</button>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" onclick="switchNewsSource('google')" id="btnNewsSrc_google" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-900 text-white transition">Google検索 (レトロ特化)</button>
+          <button type="button" onclick="switchNewsSource('denfaminicogamer')" id="btnNewsSrc_denfaminicogamer" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">電ファミ</button>
           <button type="button" onclick="switchNewsSource('automaton')" id="btnNewsSrc_automaton" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">AUTOMATON</button>
-          <button type="button" onclick="switchNewsSource('google')" id="btnNewsSrc_google" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Google検索</button>
+          <button type="button" onclick="fetchNewsFeed(true)" title="最新ニュースを再取得" class="p-1 px-2 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1 ml-1">
+            <svg id="newsRefreshIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>更新</span>
+          </button>
         </div>
       </div>
+      
+      <!-- 記事一覧グリッド -->
       <div id="newsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+      <!-- ★ ニュース用「もっと見る」ボタンコンテナ -->
+      <div id="loadMoreNewsContainer" class="py-4 text-center hidden">
+        <button type="button" onclick="loadMoreNews()" class="px-8 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-full shadow-sm transition">
+          もっと見る
+        </button>
+      </div>
     </div>
 
   </main>
@@ -480,7 +493,7 @@
     <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative flex flex-col max-h-[92vh] my-auto" onclick="event.stopPropagation()">
       
       <!-- ヘッダー -->
-      <div id="detailHeaderBg" class="relative p-5 text-white min-h-[130px] flex flex-col justify-end bg-slate-900 overflow-hidden">
+      <div id="detailHeaderBg" class="relative p-5 text-white min-h-[130px] flex flex-col justify-end bg-slate-900 overflow-hidden flex-shrink-0">
         <div id="detailCoverImageLayer" class="absolute inset-0 bg-cover bg-center transition-all duration-300 pointer-events-none opacity-0 scale-105"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-950/40 pointer-events-none"></div>
 
@@ -498,246 +511,265 @@
         <h3 id="detailTitle" class="relative z-10 text-xl sm:text-2xl font-black leading-tight drop-shadow-md text-white">--</h3>
       </div>
 
+      <!-- 詳細モーダル タブ切り替えバー -->
+      <div class="flex items-center border-b border-slate-200 bg-white px-4 pt-2.5 gap-4 text-xs font-bold flex-shrink-0">
+        <button type="button" id="detailTabBtn_main" onclick="switchDetailModalTab('main')" class="pb-2.5 border-b-2 border-emerald-600 text-emerald-600 flex items-center gap-1.5 transition font-black">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span>基本情報・管理</span>
+        </button>
+        <button type="button" id="detailTabBtn_posts" onclick="switchDetailModalTab('posts')" class="pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-700 flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+          <span>つぶやき・記録</span>
+          <span id="detailTabPostBadge" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700">0</span>
+        </button>
+      </div>
+
       <!-- モーダル本文 -->
-      <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 bg-slate-50/70 text-xs">
+      <div class="p-4 sm:p-5 overflow-y-auto flex-1 bg-slate-50/70 text-xs">
         
-        <!-- 所持ステータストグル -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div class="text-[11px] font-bold text-slate-400">所持ステータス (手元にあるか)</div>
-          <div class="grid grid-cols-3 gap-1.5">
-            <button type="button" onclick="setDetailHoldStatus('owned')" id="btnDetailHold_owned" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>📦 所持</span>
-            </button>
-            <button type="button" onclick="setDetailHoldStatus('wanted')" id="btnDetailHold_wanted" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>⭐ ほしい</span>
-            </button>
-            <button type="button" onclick="setDetailHoldStatus('unowned')" id="btnDetailHold_unowned" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>✕ 未所持</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 攻略ステータストグル -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div class="text-[11px] font-bold text-slate-400">攻略ステータス (遊んだことがあるか)</div>
-          <div class="grid grid-cols-3 gap-1.5">
-            <button type="button" onclick="setDetailPlayStatus('cleared')" id="btnDetailPlay_cleared" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>🏆 クリア済</span>
-            </button>
-            <button type="button" onclick="setDetailPlayStatus('playing')" id="btnDetailPlay_playing" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>🎮 プレイ中</span>
-            </button>
-            <button type="button" onclick="setDetailPlayStatus('none')" id="btnDetailPlay_none" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
-              <span>未プレイ</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 面白さ・おすすめ度 評価軸 -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-slate-400">面白さ・おすすめ度</span>
-            <span id="detailRatingText" class="text-[11px] font-bold text-slate-400">未評価</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <div id="detailRatingStars" class="flex items-center gap-1.5 text-2xl select-none cursor-pointer"></div>
-            <button type="button" onclick="setDetailRating(0)" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold px-2 py-1 rounded bg-slate-50 border border-slate-200 transition">
-              クリア
-            </button>
-          </div>
-        </div>
-
-        <!-- 付属品トグル -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-slate-400">付属品チェック（すべて揃うと自動で完品）</span>
-            <span id="labelDetailCompleteStatus" class="text-[11px] font-bold text-slate-400">ソフトのみ</span>
-          </div>
-          <div class="grid grid-cols-5 gap-1 text-[11px]">
-            <button type="button" onclick="toggleDetailAccessory('box')" id="btnAcc_box" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
-              <span>外箱</span>
-              <span id="badgeAcc_box" class="text-[9px] mt-0.5">✕</span>
-            </button>
-            <button type="button" onclick="toggleDetailAccessory('manual')" id="btnAcc_manual" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
-              <span>説明書</span>
-              <span id="badgeAcc_manual" class="text-[9px] mt-0.5">✕</span>
-            </button>
-            <button type="button" onclick="toggleDetailAccessory('postcard')" id="btnAcc_postcard" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
-              <span>ハガキ</span>
-              <span id="badgeAcc_postcard" class="text-[9px] mt-0.5">✕</span>
-            </button>
-            <button type="button" onclick="toggleDetailAccessory('obi')" id="btnAcc_obi" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
-              <span>帯</span>
-              <span id="badgeAcc_obi" class="text-[9px] mt-0.5">✕</span>
-            </button>
-            <button type="button" onclick="toggleDetailAccessory('bonus')" id="btnAcc_bonus" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
-              <span>特典等</span>
-              <span id="badgeAcc_bonus" class="text-[9px] mt-0.5">✕</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- メンテナンス状態トグル -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <span class="text-[11px] font-bold text-slate-400">メンテナンス状態</span>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
-            <button type="button" onclick="toggleDetailMaintenance('cleaned')" id="btnMaint_cleaned" class="py-2 px-2 rounded-xl font-bold border transition text-center">
-              🧽 端子清掃済
-            </button>
-            <button type="button" onclick="toggleDetailMaintenance('battery')" id="btnMaint_battery" class="py-2 px-2 rounded-xl font-bold border transition text-center">
-              🔋 電池交換済
-            </button>
-            <button type="button" onclick="toggleDetailMaintenance('tested')" id="btnMaint_tested" class="py-2 px-2 rounded-xl font-bold border transition text-center">
-              🕹️ 動作確認済
-            </button>
-            <button type="button" onclick="toggleDetailMaintenance('sealed')" id="btnMaint_sealed" class="py-2 px-2 rounded-xl font-bold border transition text-center">
-              🔒 未開封
-            </button>
-          </div>
-        </div>
-
-        <!-- コンディション・状態ランク ＆ バージョンメモ -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
-          <div>
-            <span class="text-[11px] font-bold text-slate-400 mb-1.5 block">コンディション・状態ランク</span>
-            <div class="grid grid-cols-5 gap-1 font-bold text-center">
-              <button type="button" onclick="setDetailConditionRank('S')" id="btnRankModal_S" class="py-1.5 rounded-lg border transition">S (美品)</button>
-              <button type="button" onclick="setDetailConditionRank('A')" id="btnRankModal_A" class="py-1.5 rounded-lg border transition">A (良品)</button>
-              <button type="button" onclick="setDetailConditionRank('B')" id="btnRankModal_B" class="py-1.5 rounded-lg border transition">B (並品)</button>
-              <button type="button" onclick="setDetailConditionRank('C')" id="btnRankModal_C" class="py-1.5 rounded-lg border transition">C (難あり)</button>
-              <button type="button" onclick="setDetailConditionRank('J')" id="btnRankModal_J" class="py-1.5 rounded-lg border transition">J (ジャンク)</button>
-            </div>
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 mb-1 block">バージョン・型番・ロム刻印メモ</label>
-            <input type="text" id="detailVersionMemoInput" onchange="saveDetailVersionMemo(this.value)" placeholder="例: 初期版(光沢ラベル), 後期版Rev1.1, ロム刻印00A..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
-          </div>
-        </div>
-
-        <!-- スペック情報枠 -->
-        <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-          <div class="grid grid-cols-2 gap-3 text-xs">
-            <div>
-              <div class="text-[10px] text-slate-400 font-bold mb-0.5">対応ハード</div>
-              <div id="detailPlatform" class="font-bold text-slate-800">--</div>
-            </div>
-            <div>
-              <div class="text-[10px] text-slate-400 font-bold mb-0.5">メーカー (企業名)</div>
-              <div id="detailPublisher" class="font-bold text-slate-800 truncate">--</div>
-            </div>
-            <div>
-              <div class="text-[10px] text-slate-400 font-bold mb-0.5">ジャンル</div>
-              <div id="detailGenre" class="font-bold text-slate-800 truncate">--</div>
-            </div>
-            <div>
-              <div class="text-[10px] text-slate-400 font-bold mb-0.5">同じ発売日のゲーム</div>
-              <div id="detailSameDateGames" class="font-bold text-emerald-600">--</div>
-            </div>
-          </div>
-
-          <!-- サムネイル枠 -->
-          <div class="pt-2 border-t border-slate-100 space-y-1.5">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] text-slate-400 font-bold">サムネイル画像 (URL入力 / G列自動取得)</span>
-              <a id="detailThumbnailUrl" href="#" target="_blank" rel="noopener noreferrer" class="text-[10px] text-emerald-600 hover:underline font-bold hidden">元画像を開く ↗</a>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center gap-3">
-              <img id="detailThumbnailImg" src="" alt="サムネイル" class="w-14 h-14 object-cover rounded-lg border border-slate-200 bg-white hidden" onerror="this.classList.add('hidden'); var e=document.getElementById('detailThumbnailEmpty'); if(e) e.classList.remove('hidden');">
-              <div id="detailThumbnailEmpty" class="w-14 h-14 rounded-lg border border-dashed border-slate-300 flex items-center justify-center text-[10px] text-slate-400 text-center font-medium flex-shrink-0">
-                No Image
-              </div>
-              <div class="flex-1 min-w-0 space-y-1">
-                <input type="url" id="detailThumbnailInput" oninput="handleDetailCoverUrlInput(this.value)" placeholder="画像URL（https://...）を入力して直接設定" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-none shadow-sm">
-                <p class="text-[9px] text-slate-400 leading-tight">URLを入力すると即座にジャケット画像とカードに反映・保存されます</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 取得情報・保管・重複管理 -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
-          <div class="text-[11px] font-bold text-slate-400">取得情報・保管場所・ダブり数</div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] text-slate-400 font-bold mb-0.5">購入金額 (円)</label>
-              <input type="number" id="detailFieldPrice" onchange="saveDetailAssetField('price', this.value)" placeholder="¥0" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold text-slate-800">
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 font-bold mb-0.5">購入日</label>
-              <input type="date" id="detailFieldDate" onchange="saveDetailAssetField('date', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 font-bold mb-0.5">購入場所 / 店舗</label>
-              <input type="text" id="detailFieldShop" onchange="saveDetailAssetField('shop', this.value)" placeholder="ハードオフ〇〇店, メルカリ, 駿河屋等" list="shopListPreset" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
-              <datalist id="shopListPreset">
-                <option value="ハードオフ"></option>
-                <option value="駿河屋"></option>
-                <option value="ブックオフ"></option>
-                <option value="メルカリ"></option>
-                <option value="ヤフーフリマ"></option>
-                <option value="秋葉原BEEP"></option>
-                <option value="スーパーポテト"></option>
-              </datalist>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 font-bold mb-0.5">保管場所 (実物位置)</label>
-              <input type="text" id="detailFieldLocation" onchange="saveDetailAssetField('location', this.value)" placeholder="例: 衣装ケースA, ラック2段目..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
-            </div>
-          </div>
+        <!-- ペイン1: 基本情報・管理 -->
+        <div id="detailTabPane_main" class="space-y-4">
           
-          <div class="flex items-center justify-between pt-1 border-t border-slate-100">
-            <span class="text-xs text-slate-600 font-bold">ダブり所持本数 (同一タイトル):</span>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="adjustDuplicateCount(-1)" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-sm">-</button>
-              <span id="detailDuplicateCountLabel" class="w-8 text-center font-black text-sm text-slate-800">1</span>
-              <button type="button" onclick="adjustDuplicateCount(1)" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-sm">+</button>
+          <!-- 所持ステータストグル -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <div class="text-[11px] font-bold text-slate-400">所持ステータス (手元にあるか)</div>
+            <div class="grid grid-cols-3 gap-1.5">
+              <button type="button" onclick="setDetailHoldStatus('owned')" id="btnDetailHold_owned" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+                <span>📦 所持</span>
+              </button>
+              <button type="button" onclick="setDetailHoldStatus('wanted')" id="btnDetailHold_wanted" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+                <span>⭐ ほしい</span>
+              </button>
+              <button type="button" onclick="setDetailHoldStatus('unowned')" id="btnDetailHold_unowned" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+                <span>✕ 未所持</span>
+              </button>
             </div>
           </div>
+
+          <!-- 攻略ステータストグル -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <div class="text-[11px] font-bold text-slate-400">攻略ステータス (遊んだことがあるか)</div>
+            <div class="grid grid-cols-3 gap-1.5">
+              <button type="button" onclick="setDetailPlayStatus('cleared')" id="btnDetailPlay_cleared" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+                <span>🏆 クリア済</span>
+              </button>
+              <button type="button" onclick="setDetailPlayStatus('playing')" id="btnDetailPlay_playing" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+                <span>🎮 プレイ中</span>
+              </button>
+              <button type="button" onclick="setDetailPlayStatus('none')" id="btnDetailPlay_none" class="py-2.5 rounded-xl font-bold border-2 transition flex items-center justify-center gap-1">
+                <span>未プレイ</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 面白さ・おすすめ度 評価軸 -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-400">面白さ・おすすめ度</span>
+              <span id="detailRatingText" class="text-[11px] font-bold text-slate-400">未評価</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div id="detailRatingStars" class="flex items-center gap-1.5 text-2xl select-none cursor-pointer"></div>
+              <button type="button" onclick="setDetailRating(0)" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold px-2 py-1 rounded bg-slate-50 border border-slate-200 transition">
+                クリア
+              </button>
+            </div>
+          </div>
+
+          <!-- 付属品トグル -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-400">付属品チェック（すべて揃うと自動で完品）</span>
+              <span id="labelDetailCompleteStatus" class="text-[11px] font-bold text-slate-400">ソフトのみ</span>
+            </div>
+            <div class="grid grid-cols-5 gap-1 text-[11px]">
+              <button type="button" onclick="toggleDetailAccessory('box')" id="btnAcc_box" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
+                <span>外箱</span>
+                <span id="badgeAcc_box" class="text-[9px] mt-0.5">✕</span>
+              </button>
+              <button type="button" onclick="toggleDetailAccessory('manual')" id="btnAcc_manual" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
+                <span>説明書</span>
+                <span id="badgeAcc_manual" class="text-[9px] mt-0.5">✕</span>
+              </button>
+              <button type="button" onclick="toggleDetailAccessory('postcard')" id="btnAcc_postcard" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
+                <span>ハガキ</span>
+                <span id="badgeAcc_postcard" class="text-[9px] mt-0.5">✕</span>
+              </button>
+              <button type="button" onclick="toggleDetailAccessory('obi')" id="btnAcc_obi" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
+                <span>帯</span>
+                <span id="badgeAcc_obi" class="text-[9px] mt-0.5">✕</span>
+              </button>
+              <button type="button" onclick="toggleDetailAccessory('bonus')" id="btnAcc_bonus" class="py-2 rounded-xl font-bold border transition text-center flex flex-col items-center">
+                <span>特典等</span>
+                <span id="badgeAcc_bonus" class="text-[9px] mt-0.5">✕</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- メンテナンス状態トグル -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-slate-400">メンテナンス状態</span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
+              <button type="button" onclick="toggleDetailMaintenance('cleaned')" id="btnMaint_cleaned" class="py-2 px-2 rounded-xl font-bold border transition text-center">
+                🧽 端子清掃済
+              </button>
+              <button type="button" onclick="toggleDetailMaintenance('battery')" id="btnMaint_battery" class="py-2 px-2 rounded-xl font-bold border transition text-center">
+                🔋 電池交換済
+              </button>
+              <button type="button" onclick="toggleDetailMaintenance('tested')" id="btnMaint_tested" class="py-2 px-2 rounded-xl font-bold border transition text-center">
+                🕹️ 動作確認済
+              </button>
+              <button type="button" onclick="toggleDetailMaintenance('sealed')" id="btnMaint_sealed" class="py-2 px-2 rounded-xl font-bold border transition text-center">
+                🔒 未開封
+              </button>
+            </div>
+          </div>
+
+          <!-- コンディション・状態ランク ＆ バージョンメモ -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 mb-1.5 block">コンディション・状態ランク</span>
+              <div class="grid grid-cols-5 gap-1 font-bold text-center">
+                <button type="button" onclick="setDetailConditionRank('S')" id="btnRankModal_S" class="py-1.5 rounded-lg border transition">S (美品)</button>
+                <button type="button" onclick="setDetailConditionRank('A')" id="btnRankModal_A" class="py-1.5 rounded-lg border transition">A (良品)</button>
+                <button type="button" onclick="setDetailConditionRank('B')" id="btnRankModal_B" class="py-1.5 rounded-lg border transition">B (並品)</button>
+                <button type="button" onclick="setDetailConditionRank('C')" id="btnRankModal_C" class="py-1.5 rounded-lg border transition">C (難あり)</button>
+                <button type="button" onclick="setDetailConditionRank('J')" id="btnRankModal_J" class="py-1.5 rounded-lg border transition">J (ジャンク)</button>
+              </div>
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-400 mb-1 block">バージョン・型番・ロム刻印メモ</label>
+              <input type="text" id="detailVersionMemoInput" onchange="saveDetailVersionMemo(this.value)" placeholder="例: 初期版(光沢ラベル), 後期版Rev1.1, ロム刻印00A..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+            </div>
+          </div>
+
+          <!-- スペック情報枠 -->
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <div class="text-[10px] text-slate-400 font-bold mb-0.5">対応ハード</div>
+                <div id="detailPlatform" class="font-bold text-slate-800">--</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-slate-400 font-bold mb-0.5">メーカー (企業名)</div>
+                <div id="detailPublisher" class="font-bold text-slate-800 truncate">--</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-slate-400 font-bold mb-0.5">ジャンル</div>
+                <div id="detailGenre" class="font-bold text-slate-800 truncate">--</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-slate-400 font-bold mb-0.5">同じ発売日のゲーム</div>
+                <div id="detailSameDateGames" class="font-bold text-emerald-600">--</div>
+              </div>
+            </div>
+
+            <!-- サムネイル枠 -->
+            <div class="pt-2 border-t border-slate-100 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] text-slate-400 font-bold">サムネイル画像 (URL入力 / G列自動取得)</span>
+                <a id="detailThumbnailUrl" href="#" target="_blank" rel="noopener noreferrer" class="text-[10px] text-emerald-600 hover:underline font-bold hidden">元画像を開く ↗</a>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center gap-3">
+                <img id="detailThumbnailImg" src="" alt="サムネイル" class="w-14 h-14 object-cover rounded-lg border border-slate-200 bg-white hidden" onerror="this.classList.add('hidden'); var e=document.getElementById('detailThumbnailEmpty'); if(e) e.classList.remove('hidden');">
+                <div id="detailThumbnailEmpty" class="w-14 h-14 rounded-lg border border-dashed border-slate-300 flex items-center justify-center text-[10px] text-slate-400 text-center font-medium flex-shrink-0">
+                  No Image
+                </div>
+                <div class="flex-1 min-w-0 space-y-1">
+                  <input type="url" id="detailThumbnailInput" oninput="handleDetailCoverUrlInput(this.value)" placeholder="画像URL（https://...）を入力して直接設定" class="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-emerald-500 focus:outline-none shadow-sm">
+                  <p class="text-[9px] text-slate-400 leading-tight">URLを入力すると即座にジャケット画像とカードに反映・保存されます</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 取得情報・保管・重複管理 -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
+            <div class="text-[11px] font-bold text-slate-400">取得情報・保管場所・ダブり数</div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] text-slate-400 font-bold mb-0.5">購入金額 (円)</label>
+                <input type="number" id="detailFieldPrice" onchange="saveDetailAssetField('price', this.value)" placeholder="¥0" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold text-slate-800">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 font-bold mb-0.5">購入日</label>
+                <input type="date" id="detailFieldDate" onchange="saveDetailAssetField('date', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 font-bold mb-0.5">購入場所 / 店舗</label>
+                <input type="text" id="detailFieldShop" onchange="saveDetailAssetField('shop', this.value)" placeholder="ハードオフ〇〇店, メルカリ, 駿河屋等" list="shopListPreset" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+                <datalist id="shopListPreset">
+                  <option value="ハードオフ"></option>
+                  <option value="駿河屋"></option>
+                  <option value="ブックオフ"></option>
+                  <option value="メルカリ"></option>
+                  <option value="ヤフーフリマ"></option>
+                  <option value="秋葉原BEEP"></option>
+                  <option value="スーパーポテト"></option>
+                </datalist>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 font-bold mb-0.5">保管場所 (実物位置)</label>
+                <input type="text" id="detailFieldLocation" onchange="saveDetailAssetField('location', this.value)" placeholder="例: 衣装ケースA, ラック2段目..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700">
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between pt-1 border-t border-slate-100">
+              <span class="text-xs text-slate-600 font-bold">ダブり所持本数 (同一タイトル):</span>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="adjustDuplicateCount(-1)" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-sm">-</button>
+                <span id="detailDuplicateCountLabel" class="w-8 text-center font-black text-sm text-slate-800">1</span>
+                <button type="button" onclick="adjustDuplicateCount(1)" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-sm">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 外部参照ボタン -->
+          <div class="grid grid-cols-3 gap-2">
+            <a id="detailWikiBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-center transition flex items-center justify-center gap-1 shadow-sm">
+              <span>📖 Wikipedia</span>
+            </a>
+            <a id="detailYoutubeBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 px-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl font-bold text-center transition flex items-center justify-center gap-1 shadow-sm">
+              <span>▶ YouTube</span>
+            </a>
+            <a id="detailGoogleBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 px-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-xl font-bold text-center transition flex items-center justify-center gap-1 shadow-sm">
+              <span>🔍 Web検索</span>
+            </a>
+          </div>
+
+          <!-- 相場検索リンク -->
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <a id="detailMercariBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-center transition shadow flex items-center justify-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+              メルカリで調べる
+            </a>
+            <a id="detailPayPayBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-center transition shadow flex items-center justify-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+              ヤフーフリマで調べる
+            </a>
+          </div>
+
         </div>
 
-        <!-- つぶやき・プレイ記録 -->
-        <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
-          <div class="flex items-center justify-between">
+        <!-- ペイン2: つぶやき・記録 -->
+        <div id="detailTabPane_posts" class="space-y-3.5 hidden">
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
             <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-              このゲームのつぶやき・記録
+              このゲームのつぶやき・記録を投稿
             </span>
-            <span id="detailPostCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">0件</span>
-          </div>
-          
-          <div class="flex gap-1.5">
-            <input type="text" id="detailQuickPostInput" placeholder="このゲームの感想、攻略メモなどをつぶやく..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-500">
-            <button type="button" onclick="handleDetailQuickPostSubmit()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex-shrink-0">
-              投稿
-            </button>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <textarea id="detailQuickPostInput" rows="2" placeholder="感想、苦戦したボス、攻略メモ、思い出などを記録..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-500"></textarea>
+              <button type="button" onclick="handleDetailQuickPostSubmit()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shrink-0">
+                投稿する
+              </button>
+            </div>
           </div>
 
-          <div id="detailPostListContainer" class="max-h-40 overflow-y-auto space-y-2 pr-0.5"></div>
-        </div>
-
-        <!-- 外部参照ボタン -->
-        <div class="grid grid-cols-3 gap-2">
-          <a id="detailWikiBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-center transition flex items-center justify-center gap-1 shadow-sm">
-            <span>📖 Wikipedia</span>
-          </a>
-          <a id="detailYoutubeBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 px-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl font-bold text-center transition flex items-center justify-center gap-1 shadow-sm">
-            <span>▶ YouTube</span>
-          </a>
-          <a id="detailGoogleBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2 px-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-xl font-bold text-center transition flex items-center justify-center gap-1 shadow-sm">
-            <span>🔍 Web検索</span>
-          </a>
-        </div>
-
-        <!-- 相場検索リンク -->
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <a id="detailMercariBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-center transition shadow flex items-center justify-center gap-1.5">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-            メルカリで調べる
-          </a>
-          <a id="detailPayPayBtn" href="#" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-center transition shadow flex items-center justify-center gap-1.5">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-            ヤフーフリマで調べる
-          </a>
+          <div class="space-y-2">
+            <div class="text-[11px] font-bold text-slate-400 px-1">過去の記録一覧</div>
+            <div id="detailPostListContainer" class="space-y-2"></div>
+          </div>
         </div>
 
       </div>
@@ -801,7 +833,7 @@
     var currentPlayFilter = 'ALL';
     var currentPlatformFilter = 'ALL';
     var currentGenreFilter = 'ALL';
-    var currentSyllabaryFilter = 'ALL'; // ★ 五十音フィルター状態 ('ALL', 'ア', 'カ', ...)
+    var currentSyllabaryFilter = 'ALL';
     var currentRankFilter = 'ALL';
     var currentRatingFilter = 0;
     var currentSort = 'release_asc';
@@ -813,6 +845,11 @@
     var debounceTimer = null;
     var detailModalDirty = false;
     var isFilterDrawerOpen = true;
+
+    // ★ ニュース関連変数（ページング対応）
+    var currentNewsSource = 'google';
+    var allNewsList = [];
+    var newsDisplayLimit = 10;
 
     function goToTop() {
       switchNavTab('catalog');
@@ -916,14 +953,28 @@
       return mmdd;
     }
 
-    // ★ 五十音用：記号や空白を取り除いた先頭文字を抽出
+    // ★ 日本時間（JST）への厳密フォーマット関数
+    function formatNewsDate(dateString) {
+      if (!dateString) return '';
+      try {
+        var d = new Date(dateString);
+        if (isNaN(d.getTime())) return dateString.slice(0, 16);
+        var mo = d.getMonth() + 1;
+        var da = d.getDate();
+        var ho = ('0' + d.getHours()).slice(-2);
+        var mi = ('0' + d.getMinutes()).slice(-2);
+        return mo + '月' + da + '日 ' + ho + ':' + mi;
+      } catch (e) {
+        return dateString.slice(0, 16);
+      }
+    }
+
     function getFirstCharForSyllabary(str) {
       if (!str) return '';
       var clean = String(str).replace(/^[  \t\r\n『』【】「」"'\(\)（）［］\[\]!！?？・:：〜~～\-\_\/]+/g, '');
       return clean.charAt(0);
     }
 
-    // ★ 五十音マッチング判定
     function matchSyllabary(char, row) {
       if (row === 'ALL') return true;
       if (!char) return false;
@@ -1334,7 +1385,7 @@
 
           updatePlatformSidebarPills(catalog);
           updateGenreSidebarPills(catalog);
-          updateSyllabarySidebarPills(catalog); // ★ 五十音タグ生成
+          updateSyllabarySidebarPills(catalog);
           applyFilters();
           renderCalendar();
           if (!isSilent) showToast('スプレッドシートマスターを最新化しました', 'success');
@@ -1432,7 +1483,6 @@
       applyFilters();
     }
 
-    // ★ 五十音切り替え
     function setQuickSyllabary(row) {
       currentSyllabaryFilter = row;
       var label = document.getElementById('activeSyllabaryLabel');
@@ -1441,7 +1491,6 @@
       applyFilters();
     }
 
-    // ★ 五十音タグの動的生成
     function updateSyllabarySidebarPills(list) {
       var counts = {
         'ア': 0, 'カ': 0, 'サ': 0, 'タ': 0, 'ナ': 0,
@@ -1485,7 +1534,7 @@
       currentPlayFilter = 'ALL';
       currentPlatformFilter = 'ALL';
       currentGenreFilter = 'ALL';
-      currentSyllabaryFilter = 'ALL'; // ★ リセット
+      currentSyllabaryFilter = 'ALL';
       currentRankFilter = 'ALL';
       currentRatingFilter = 0;
       currentAnniversaryFilter = null;
@@ -1682,7 +1731,6 @@
           if (gGenre !== currentGenreFilter) continue;
         }
 
-        // ★ 五十音判定
         if (currentSyllabaryFilter !== 'ALL') {
           var str = g.kana || g.title || '';
           var firstChar = getFirstCharForSyllabary(str);
@@ -2004,7 +2052,9 @@
 
       var quickPostInput = document.getElementById('detailQuickPostInput');
       if (quickPostInput) quickPostInput.value = '';
+      
       renderDetailGamePosts();
+      switchDetailModalTab('main');
 
       updateDetailHoldButtons(u.hold_status);
       updateDetailPlayButtons(u.play_status);
@@ -2059,6 +2109,28 @@
       if (detailModalDirty) {
         detailModalDirty = false;
         applyFilters();
+      }
+    }
+
+    function switchDetailModalTab(tab) {
+      var pMain = document.getElementById('detailTabPane_main');
+      var pPosts = document.getElementById('detailTabPane_posts');
+      var bMain = document.getElementById('detailTabBtn_main');
+      var bPosts = document.getElementById('detailTabBtn_posts');
+
+      var activeClass = 'pb-2.5 border-b-2 border-emerald-600 text-emerald-600 flex items-center gap-1.5 transition font-black';
+      var inactiveClass = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-700 flex items-center gap-1.5 transition font-bold';
+
+      if (tab === 'posts') {
+        if (pMain) pMain.classList.add('hidden');
+        if (pPosts) pPosts.classList.remove('hidden');
+        if (bMain) bMain.className = inactiveClass;
+        if (bPosts) bPosts.className = activeClass;
+      } else {
+        if (pMain) pMain.classList.remove('hidden');
+        if (pPosts) pPosts.classList.add('hidden');
+        if (bMain) bMain.className = activeClass;
+        if (bPosts) bPosts.className = inactiveClass;
       }
     }
 
@@ -2374,7 +2446,7 @@
 
     function renderDetailGamePosts() {
       var container = document.getElementById('detailPostListContainer');
-      var badge = document.getElementById('detailPostCountBadge');
+      var tabBadge = document.getElementById('detailTabPostBadge');
       if (!container || !currentDetailGame) return;
 
       var matched = playPosts.filter(function(p) {
@@ -2382,21 +2454,21 @@
                (p.game_title === currentDetailGame.title && p.game_platform === currentDetailGame.platform);
       });
 
-      if (badge) badge.textContent = matched.length + '件';
+      if (tabBadge) tabBadge.textContent = matched.length;
 
       if (matched.length === 0) {
-        container.innerHTML = '<div class="p-3 text-center text-slate-400 text-[11px] bg-slate-50 rounded-xl border border-dashed border-slate-200">まだこのゲームのつぶやきはありません。上部のフォームから投稿できます。</div>';
+        container.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs bg-white rounded-2xl border border-dashed border-slate-200">まだこのゲームのつぶやきはありません。<br>上の入力欄から思い出や攻略メモを記録してみましょう！</div>';
         return;
       }
 
       container.innerHTML = matched.map(function(p) {
         var d = new Date(p.created_at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        return '<div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1.5">' +
+        return '<div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">' +
           '<div class="flex items-center justify-between text-[10px] text-slate-400">' +
-            '<span class="font-bold text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200">' + escapeHtml(p.tag || 'プレイ記録') + '</span>' +
+            '<span class="font-bold text-slate-700 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">' + escapeHtml(p.tag || 'プレイ記録') + '</span>' +
             '<div class="flex items-center gap-2">' +
               '<span>' + d + '</span>' +
-              '<button type="button" onclick="deleteDetailGamePost(\'' + p.id + '\')" title="削除" class="text-slate-300 hover:text-red-500 font-bold">✕</button>' +
+              '<button type="button" onclick="deleteDetailGamePost(\'' + p.id + '\')" title="削除" class="text-slate-300 hover:text-red-500 font-bold p-0.5">✕</button>' +
             '</div>' +
           '</div>' +
           '<p class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed pl-0.5">' + escapeHtml(p.content) + '</p>' +
@@ -2438,6 +2510,208 @@
       showToast('投稿を削除しました', 'info');
     }
 
+    // ★ ニュースフィードの取得（最新順ソート ＆ ページング対応）
+    function fetchNewsFeed(force) {
+      var container = document.getElementById('newsContainer');
+      var refreshIcon = document.getElementById('newsRefreshIcon');
+      var moreContainer = document.getElementById('loadMoreNewsContainer');
+      if (!container) return;
+      if (!force && allNewsList.length > 0) {
+        renderNewsItems();
+        return;
+      }
+
+      if (refreshIcon) refreshIcon.classList.add('animate-spin');
+      container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">最新ニュースをリアルタイム取得中...</div>';
+      if (moreContainer) moreContainer.classList.add('hidden');
+
+      var targetRssUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent('(レトロゲーム OR ファミコン OR "スーパーファミコン" OR "メガドライブ" OR "PCエンジン" OR "ゲームボーイ" OR "セガサターン" OR "アーケードアーカイブス" OR "アケアカ") -PS5 -"PlayStation 5" -"Xbox Series" -スマホゲーム -ガチャ') + '&hl=ja&gl=JP&ceid=JP:ja';
+      if (currentNewsSource === 'denfaminicogamer') {
+        targetRssUrl = 'https://news.denfaminicogamer.jp/feed';
+      } else if (currentNewsSource === 'automaton') {
+        targetRssUrl = 'https://automaton-media.com/feed/';
+      }
+
+      var cacheBuster = Date.now();
+      var proxyUrls = [
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetRssUrl + (targetRssUrl.indexOf('?') === -1 ? '?_cb=' : '&_cb=') + cacheBuster),
+        'https://corsproxy.io/?' + encodeURIComponent(targetRssUrl + (targetRssUrl.indexOf('?') === -1 ? '?_cb=' : '&_cb=') + cacheBuster)
+      ];
+
+      function tryFetchRss(idx) {
+        if (idx >= proxyUrls.length) {
+          fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(targetRssUrl) + '&_cb=' + cacheBuster)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+              if (data && data.items && data.items.length > 0) {
+                allNewsList = data.items.map(function(item) {
+                  var thumb = item.thumbnail || (item.enclosure && item.enclosure.link) || extractThumbnailFromHtml(item.content || item.description);
+                  var parsedTitle = item.title || '';
+                  var sourceName = (currentNewsSource === 'denfaminicogamer') ? '電ファミニコゲーマー' :
+                                   (currentNewsSource === 'automaton') ? 'AUTOMATON' : 'Googleニュース';
+
+                  if (currentNewsSource === 'google' && parsedTitle.lastIndexOf(' - ') !== -1) {
+                    var parts = parsedTitle.split(' - ');
+                    sourceName = parts.pop();
+                    parsedTitle = parts.join(' - ');
+                  }
+
+                  return {
+                    title: parsedTitle,
+                    source: sourceName,
+                    link: item.link,
+                    pubDate: item.pubDate,
+                    thumbnail: thumb
+                  };
+                });
+
+                allNewsList.sort(function(a, b) {
+                  return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+                });
+
+                newsDisplayLimit = 10;
+                renderNewsItems();
+              } else {
+                throw new Error();
+              }
+            })
+            .catch(function() {
+              container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">ニュースの取得に失敗しました。「更新」ボタンを再度お試しください。</div>';
+            })
+            .finally(function() {
+              if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+            });
+          return;
+        }
+
+        fetch(proxyUrls[idx], { cache: 'no-store' })
+          .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.text();
+          })
+          .then(function(xmlText) {
+            var parser = new DOMParser();
+            var xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+            var items = xmlDoc.querySelectorAll('item');
+
+            if (!items || items.length === 0) throw new Error('XML empty');
+
+            var newsList = [];
+            for (var i = 0; i < items.length; i++) {
+              var it = items[i];
+              var rawTitle = it.querySelector('title') ? it.querySelector('title').textContent : '';
+              var link = it.querySelector('link') ? it.querySelector('link').textContent : '#';
+              var pubDate = it.querySelector('pubDate') ? it.querySelector('pubDate').textContent : '';
+              var desc = it.querySelector('description') ? it.querySelector('description').textContent : '';
+              var content = it.getElementsByTagNameNS('*', 'encoded').length > 0 ? it.getElementsByTagNameNS('*', 'encoded')[0].textContent : '';
+              
+              var thumb = extractThumbnailFromHtml(content) || extractThumbnailFromHtml(desc);
+              if (!thumb && it.querySelector('enclosure')) {
+                thumb = it.querySelector('enclosure').getAttribute('url') || '';
+              }
+
+              var title = rawTitle;
+              var sourceName = (currentNewsSource === 'denfaminicogamer') ? '電ファミニコゲーマー' :
+                               (currentNewsSource === 'automaton') ? 'AUTOMATON' : 'Googleニュース';
+
+              if (currentNewsSource === 'google') {
+                var sourceTag = it.querySelector('source');
+                if (sourceTag && sourceTag.textContent) {
+                  sourceName = sourceTag.textContent.trim();
+                } else if (rawTitle.lastIndexOf(' - ') !== -1) {
+                  var parts = rawTitle.split(' - ');
+                  sourceName = parts.pop();
+                  title = parts.join(' - ');
+                }
+              }
+
+              newsList.push({
+                title: title,
+                source: sourceName,
+                link: link,
+                pubDate: pubDate,
+                thumbnail: thumb
+              });
+            }
+
+            newsList.sort(function(a, b) {
+              return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+            });
+
+            allNewsList = newsList;
+            newsDisplayLimit = 10;
+            renderNewsItems();
+            if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+          })
+          .catch(function() {
+            tryFetchRss(idx + 1);
+          });
+      }
+
+      tryFetchRss(0);
+    }
+
+    // ★ ニュース描画（ページング制限と「もっと見る」ボタン表示制御）
+    function renderNewsItems() {
+      var container = document.getElementById('newsContainer');
+      var moreContainer = document.getElementById('loadMoreNewsContainer');
+      if (!container) return;
+
+      var currentBatch = allNewsList.slice(0, newsDisplayLimit);
+
+      if (currentBatch.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">ニュース記事が見つかりませんでした。</div>';
+        if (moreContainer) moreContainer.classList.add('hidden');
+        return;
+      }
+
+      container.innerHTML = currentBatch.map(function(item) {
+        var safeLink = isValidHttpUrl(item.link) ? item.link : '#';
+        var formattedDate = formatNewsDate(item.pubDate);
+        var thumbHtml = item.thumbnail && isValidHttpUrl(item.thumbnail)
+          ? '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0"><img src="' + escapeHtml(item.thumbnail) + '" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.remove()"></div>'
+          : '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-800 rounded-xl flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">GAME NEWS</div>';
+
+        return '<a href="' + escapeHtml(safeLink) + '" target="_blank" rel="noopener noreferrer" class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex items-start gap-3 group">' +
+          thumbHtml +
+          '<div class="flex-1 min-w-0 flex flex-col justify-between h-24 sm:h-28">' +
+            '<h4 class="font-black text-slate-800 text-xs sm:text-sm group-hover:text-emerald-600 transition line-clamp-3 leading-snug">' + escapeHtml(item.title) + '</h4>' +
+            '<div class="flex items-center justify-between text-[10px] text-slate-400 mt-1 font-medium">' +
+              '<span class="truncate max-w-[120px] text-slate-500 font-bold">' + escapeHtml(item.source || '') + '</span>' +
+              '<span>' + escapeHtml(formattedDate) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</a>';
+      }).join('');
+
+      if (moreContainer) {
+        moreContainer.classList.toggle('hidden', newsDisplayLimit >= allNewsList.length);
+      }
+    }
+
+    // ★ 「もっと見る」押下時
+    function loadMoreNews() {
+      newsDisplayLimit += 10;
+      renderNewsItems();
+    }
+
+    function switchNewsSource(source) {
+      currentNewsSource = source;
+      ['google', 'denfaminicogamer', 'automaton'].forEach(function(src) {
+        var btn = document.getElementById('btnNewsSrc_' + src);
+        if (btn) {
+          btn.className = (src === source) ? 'px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-900 text-white transition' : 'px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+        }
+      });
+      fetchNewsFeed(true);
+    }
+
+    function extractThumbnailFromHtml(html) {
+      if (!html) return '';
+      var m = html.match(/<img[^>]+src=["'](https?:\/\/[^"']+)["']/i);
+      return (m && m[1]) ? m[1] : '';
+    }
+
     function updateSingleCardDom(gameId) {
       var card = document.getElementById('gameCard_' + gameId);
       if (!card) return;
@@ -2458,7 +2732,7 @@
         kana: game.kana,
         platform: game.platform,
         publisher: game.publisher,
-        genre: g.genre,
+        genre: game.genre,
         release_date: game.release_date,
         cover_url: u.cover_url || game.cover_url || '',
         hold_status: u.hold_status,
@@ -2709,7 +2983,6 @@
                               (pct >= 50) ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-emerald-500';
 
         html += '<div class="' + cardBorder + ' p-3.5 rounded-2xl transition space-y-2.5">' +
-          
           '<div class="flex items-center justify-between flex-wrap gap-1">' +
             '<div class="flex items-center gap-2 min-w-0">' +
               '<span class="px-2 py-0.5 rounded text-[11px] font-black ' + (isPerfect ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-900 text-white') + ' flex-shrink-0">' + 
@@ -2861,6 +3134,7 @@
     function deletePlayPost(postId) {
       playPosts = playPosts.filter(function(p) { return p.id !== postId; });
       savePlayPosts();
+      renderDetailGamePosts();
       renderPlayPosts();
       showToast('投稿を削除しました', 'info');
     }
@@ -2963,69 +3237,6 @@
       }
 
       grid.innerHTML = html;
-    }
-
-    var currentNewsSource = 'denfaminicogamer';
-    function switchNewsSource(source) {
-      currentNewsSource = source;
-      ['denfaminicogamer', 'automaton', 'google'].forEach(function(src) {
-        var btn = document.getElementById('btnNewsSrc_' + src);
-        if (btn) {
-          btn.className = (src === source) ? 'px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-900 text-white transition' : 'px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
-        }
-      });
-      fetchNewsFeed(true);
-    }
-
-    function extractThumbnailFromItem(item) {
-      if (item.thumbnail && isValidHttpUrl(item.thumbnail)) return item.thumbnail;
-      if (item.enclosure && item.enclosure.link && isValidHttpUrl(item.enclosure.link)) return item.enclosure.link;
-      var html = (item.content || '') + ' ' + (item.description || '');
-      var m = html.match(/<img[^>]+src=["'](https?:\/\/[^"']+)["']/i);
-      if (m && m[1] && isValidHttpUrl(m[1])) return m[1];
-      return '';
-    }
-
-    function fetchNewsFeed(force) {
-      var container = document.getElementById('newsContainer');
-      if (!container) return;
-      if (!force && container.children.length > 0) return;
-
-      container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">ニュースを取得中...</div>';
-
-      var rssUrl = 'https://news.denfaminicogamer.jp/feed';
-      if (currentNewsSource === 'automaton') {
-        rssUrl = 'https://automaton-media.com/feed/';
-      } else if (currentNewsSource === 'google') {
-        rssUrl = 'https://news.google.com/rss/search?q=%E3%83%AC%E3%83%88%E3%83%AD%E3%82%B2%E3%83%BC%E3%83%A0&hl=ja&gl=JP&ceid=JP:ja';
-      }
-
-      fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.items && data.items.length > 0) {
-            container.innerHTML = data.items.slice(0, 8).map(function(item) {
-              var safeLink = isValidHttpUrl(item.link) ? item.link : '#';
-              var thumb = extractThumbnailFromItem(item);
-              var thumbHtml = thumb 
-                ? '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0"><img src="' + escapeHtml(thumb) + '" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.remove()">' + '</div>'
-                : '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-800 rounded-xl flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">GAME NEWS</div>';
-
-              return '<a href="' + escapeHtml(safeLink) + '" target="_blank" rel="noopener noreferrer" class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex items-start gap-3 group">' +
-                thumbHtml +
-                '<div class="flex-1 min-w-0 flex flex-col justify-between h-24 sm:h-28">' +
-                  '<h4 class="font-black text-slate-800 text-xs sm:text-sm group-hover:text-emerald-600 transition line-clamp-3 leading-snug">' + escapeHtml(item.title) + '</h4>' +
-                  '<div class="text-[10px] text-slate-400 mt-1">' + escapeHtml((item.pubDate || '').slice(0, 16)) + '</div>' +
-                '</div>' +
-              '</a>';
-            }).join('');
-          } else {
-            container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">ニュース記事が見つかりませんでした。</div>';
-          }
-        })
-        .catch(function() {
-          container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">ニュース取得に失敗しました。</div>';
-        });
     }
 
     function switchNavTab(tab) {
