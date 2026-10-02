@@ -440,32 +440,72 @@
 
     <!-- ニュースセクション -->
     <div id="sectionNews" class="space-y-4 hidden">
+
+      <!-- ヘッダーカード -->
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 class="text-sm font-black text-slate-800">レトロゲーム・最新ニュース</h3>
-          <p class="text-xs text-slate-400">大手メディアの最新記事をリアルタイム配信</p>
+          <p class="text-xs text-slate-400">ゲームメディアとGoogleニュースから、レトロゲームの話題を新着順にまとめています</p>
         </div>
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <button type="button" onclick="switchNewsSource('google')" id="btnNewsSrc_google" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-900 text-white transition">Google検索 (レトロ特化)</button>
-          <button type="button" onclick="switchNewsSource('denfaminicogamer')" id="btnNewsSrc_denfaminicogamer" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">電ファミ</button>
-          <button type="button" onclick="switchNewsSource('automaton')" id="btnNewsSrc_automaton" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">AUTOMATON</button>
-          <button type="button" onclick="fetchNewsFeed(true)" title="最新ニュースを再取得" class="p-1 px-2 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1 ml-1">
+        <div class="flex items-center gap-2">
+          <span id="newsUpdatedAt" class="text-[10px] text-slate-400"></span>
+          <button type="button" onclick="toggleNewsFeedPanel()" class="p-1 px-2.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition">⚙ フィードを管理</button>
+          <button type="button" id="newsRefreshBtn" onclick="fetchNewsFeed(true)" title="最新ニュースを再取得" class="p-1 px-2.5 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1 disabled:opacity-50 disabled:cursor-wait">
             <svg id="newsRefreshIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            <span>更新</span>
+            <span>最新に更新</span>
           </button>
         </div>
       </div>
-      
+
+<!-- 購読中チップ（ニュースタブ内でのみ表示） -->
+<div class="bg-white px-3 py-2.5 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-2">
+  <span class="text-[11px] font-bold text-slate-400 pt-1 flex-shrink-0">購読中</span>
+  <div id="newsFeedChips" class="flex flex-wrap gap-1.5 flex-1"></div>
+</div>
+
+      <!-- フィード管理パネル（デフォルトで閉じる） -->
+      <div id="newsFeedPanel" class="hidden bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-black text-slate-800">フィードを管理</h4>
+          <button type="button" onclick="resetNewsFeeds()" class="text-[11px] text-slate-400 hover:text-emerald-600 font-bold">初期設定に戻す</button>
+        </div>
+
+        <div class="space-y-2">
+          <div class="text-[11px] font-bold text-slate-400">フィードを追加</div>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+            <select id="newsFeedType" class="text-xs bg-slate-50 border border-slate-200 rounded-xl p-2">
+              <option value="keyword">キーワード（Googleニュース）</option>
+              <option value="url">RSS / Atom の URL</option>
+            </select>
+            <input type="text" id="newsFeedValue" placeholder="例: メガドライブ  /  https://.../feed" class="sm:col-span-2 text-xs bg-slate-50 border border-slate-200 rounded-xl p-2">
+            <input type="text" id="newsFeedName" placeholder="表示名（省略可）" class="text-xs bg-slate-50 border border-slate-200 rounded-xl p-2">
+          </div>
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+              <input type="checkbox" id="newsFeedRetroOnly" class="w-4 h-4 rounded text-emerald-600">
+              <span>レトロ関連の語を含む記事だけ表示（総合ゲームサイト向け）</span>
+            </label>
+            <button type="button" onclick="addNewsFeed()" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl">追加</button>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-100 pt-3 space-y-1">
+          <div class="text-[11px] font-bold text-slate-400">登録済みフィード</div>
+          <div id="newsFeedList"></div>
+        </div>
+      </div>
+
       <!-- 記事一覧グリッド -->
       <div id="newsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
 
-      <!-- ★ ニュース用「もっと見る」ボタンコンテナ -->
+      <!-- ニュース用「もっと見る」ボタンコンテナ -->
       <div id="loadMoreNewsContainer" class="py-4 text-center hidden">
         <button type="button" onclick="loadMoreNews()" class="px-8 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-full shadow-sm transition">
           もっと見る
         </button>
       </div>
-    </div>
+
+    </div><!-- /sectionNews -->
 
   </main>
 
@@ -825,7 +865,7 @@
   </div>
 
   <!-- トースト通知 -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none px-4 py-2.5 rounded-xl shadow-lg text-xs font-bold text-white bg-slate-900 flex items-center gap-2">
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none px-4 py-2.5 rounded-xl shadow-lg text-xs font-bold text-white flex items-center gap-2 bg-slate-900">
     <span id="toastMsg">通知メッセージ</span>
   </div>
 
@@ -846,8 +886,8 @@
     var currentUser = null;
     var firestoreUnsubscribe = null;
     var firestoreSyncTimer = null;
-    var isSelfSyncing = false;
     var isFirestoreInitialLoaded = false;
+    var isSelfSyncing = false;
 
     var MASTER_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQSUJIaD7Mr4PjO1O1-uNMiwMQdpKCiO8e1aZ3pbNp4LCO_EbXQpNNwoe0pWNptfaOzM5jY2T7BLGVe/pub?gid=1641792250&single=true&output=csv';
     var STORAGE_KEY_CATALOG = 'retrovault_master_catalog_cache_v3';
@@ -876,10 +916,15 @@
     var detailModalDirty = false;
     var isFilterDrawerOpen = true;
 
-    // ★ ニュース関連変数（ページング対応）
-    var currentNewsSource = 'google';
+    // ニュース関連変数
+    var NEWS_API_URL = 'https://script.google.com/macros/s/AKfycbwULCm85yR263LyQRYgBBnh9IUg4-Fie1GfZcUOJZuM_DO7-c_JcMEzm8g18fWvrYwO1A/exec';
+    var STORAGE_KEY_NEWS = 'retrovault_news_cache_v1';
+    var NEWS_CLIENT_TTL_MS = 10 * 60 * 1000; // 10分以内なら再取得しない
     var allNewsList = [];
     var newsDisplayLimit = 10;
+    var newsFetchedAt = 0;
+    var newsUpdatedLabel = '';
+    var isNewsLoading = false;
 
     function goToTop() {
       switchNavTab('catalog');
@@ -983,7 +1028,6 @@
       return mmdd;
     }
 
-    // ★ 日本時間（JST）への厳密フォーマット関数
     function formatNewsDate(dateString) {
       if (!dateString) return '';
       try {
@@ -1135,7 +1179,6 @@
       auth.signOut().then(function() {
         if (firestoreUnsubscribe) firestoreUnsubscribe();
         currentUser = null;
-        isFirestoreInitialLoaded = false;
         updateAuthDisplay(null);
         showToast("ログアウトしました", "info");
       });
@@ -1168,7 +1211,6 @@
       if (firestoreUnsubscribe) firestoreUnsubscribe();
 
       firestoreUnsubscribe = db.collection('users').doc(uid).onSnapshot(function(doc) {
-        // 自発的な保存処理中、または保留中の書き込みがある場合は全体再描画をスキップ
         if (isSelfSyncing || (doc.metadata && doc.metadata.hasPendingWrites)) {
           return;
         }
@@ -1177,6 +1219,11 @@
           var data = doc.data();
           userStates = data.userStates || {};
           playPosts = data.playPosts || [];
+          if (data.newsFeeds && data.newsFeeds.length) {
+  newsFeeds = data.newsFeeds;
+  try { localStorage.setItem(STORAGE_KEY_NEWS_FEEDS, JSON.stringify(newsFeeds)); } catch (e) {}
+  renderNewsFeedPanel();
+}
 
           localStorage.setItem(STORAGE_KEY_USER_STATES, JSON.stringify(userStates));
           localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(playPosts));
@@ -1184,7 +1231,6 @@
           updateDashboardSummary();
           renderPlayPosts();
 
-          // 初回同期時のみ一覧全体を描画。操作中にスクロールが巻き戻るのを遮断
           if (!isFirestoreInitialLoaded) {
             isFirestoreInitialLoaded = true;
             applyFilters();
@@ -1203,6 +1249,7 @@
       firestoreSyncTimer = setTimeout(function() {
         isSelfSyncing = true;
         db.collection('users').doc(currentUser.uid).set({
+          newsFeeds: newsFeeds,
           userStates: userStates,
           playPosts: playPosts,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1281,8 +1328,6 @@
       userStates[k].owned = !currentlyOwned;
 
       saveUserStates();
-
-      // 一覧全体をリセットせず、対象カードのDOMだけを安全に更新
       updateSingleCardDom(game.id);
 
       showToast(nextHold === 'owned' ? ('「' + game.title + '」を所持に登録しました') : ('「' + game.title + '」の所持を解除しました'), nextHold === 'owned' ? 'success' : 'info');
@@ -2643,7 +2688,7 @@
               '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800">' + escapeHtml(p.tag) + '</span>' +
             '</div>' +
             '<div class="flex items-center gap-2">' +
-              '<span class="text-[10px] text-slate-400">' + dateStr + '</span>' +
+              '<span>' + dateStr + '</span>' +
               '<button type="button" onclick="deletePlayPost(\'' + p.id + '\')" class="text-slate-300 hover:text-red-500 text-xs">✕</button>' +
             '</div>' +
           '</div>' +
@@ -2752,81 +2797,432 @@
       if (tab === 'news') fetchNewsFeed(false);
     }
 
-    function openCsvImportModal() {
-      var m = document.getElementById('csvModal');
-      if (m) m.classList.remove('hidden');
+// ===== ニュースフィード管理 =====
+var STORAGE_KEY_NEWS_FEEDS = 'retrovault_news_feeds_v1';
+var newsFeeds = [];
+var newsFailedFeeds = [];
+
+// この語を含む記事だけを表示（「レトロ関連のみ」をONにしたフィード用）
+var RETRO_KEYWORDS = ['レトロ','ファミコン','ファミリーコンピュータ','スーパーファミコン','スーファミ',
+  'ゲームボーイ','メガドライブ','セガサターン','PCエンジン','ドリームキャスト','アーケードアーカイブス',
+  'ハドソン','復刻','Switch Online','クラシックミニ','ネオジオ','ワンダースワン'];
+
+function gnUrl(q) {
+  return 'https://news.google.com/rss/search?q=' + encodeURIComponent(q) + '&hl=ja&gl=JP&ceid=JP:ja';
+}
+
+function isYoutubeFeed(f) {
+  return f.type === 'youtube' || (f.url || '').indexOf('youtube.com/feeds/videos.xml') !== -1;
+}
+
+function getDefaultNewsFeeds() {
+  return [
+    { id: 'f_gn_retro', name: 'Googleニュース: レトロゲーム', url: gnUrl('レトロゲーム'), enabled: true, retroOnly: false },
+    { id: 'f_gn_fc', name: 'Googleニュース: ファミコン', url: gnUrl('ファミコン'), enabled: true, retroOnly: false },
+    { id: 'f_gn_sfc', name: 'Googleニュース: スーパーファミコン', url: gnUrl('スーパーファミコン'), enabled: true, retroOnly: false },
+    { id: 'f_gn_gb', name: 'Googleニュース: ゲームボーイ', url: gnUrl('ゲームボーイ'), enabled: true, retroOnly: false },
+    { id: 'f_gamewatch', name: 'GAME Watch', url: 'https://game.watch.impress.co.jp/data/rss/1.0/gmw/feed.rdf', enabled: true, retroOnly: true },
+    { id: 'f_automaton', name: 'AUTOMATON', url: 'https://automaton-media.com/feed/', enabled: true, retroOnly: true },
+    { id: 'f_yt_retro', name: 'YouTube: レトロゲーム', url: gnUrl('レトロゲーム site:youtube.com'), enabled: true, retroOnly: false, type: 'youtube' }
+  ];
+}
+
+function loadNewsFeeds() {
+  try {
+    var s = localStorage.getItem(STORAGE_KEY_NEWS_FEEDS);
+    if (s) { newsFeeds = JSON.parse(s); }
+  } catch (e) { newsFeeds = []; }
+  if (!Array.isArray(newsFeeds) || newsFeeds.length === 0) newsFeeds = getDefaultNewsFeeds();
+
+  // YouTubeフィードが1件も無ければ、初期のYouTubeフィードを補う
+  if (!newsFeeds.some(isYoutubeFeed)) {
+    getDefaultNewsFeeds().filter(isYoutubeFeed).forEach(function(f) { newsFeeds.push(f); });
+    try { localStorage.setItem(STORAGE_KEY_NEWS_FEEDS, JSON.stringify(newsFeeds)); } catch (e) {}
+  }
+}
+
+function saveNewsFeeds() {
+  try { localStorage.setItem(STORAGE_KEY_NEWS_FEEDS, JSON.stringify(newsFeeds)); } catch (e) {}
+  syncToFirestore();
+}
+
+function toggleNewsFeedPanel() {
+  var p = document.getElementById('newsFeedPanel');
+  if (!p) return;
+  p.classList.toggle('hidden');
+  renderNewsFeedPanel();
+}
+
+// 常時表示：購読フィードのチップ（クリックでON/OFF）
+function renderNewsFeedChips() {
+  var box = document.getElementById('newsFeedChips');
+  if (!box) return;
+  if (newsFeeds.length === 0) {
+    box.innerHTML = '<span class="text-[11px] text-slate-400">フィードがありません。「フィードを管理」から追加してください。</span>';
+    return;
+  }
+  box.innerHTML = newsFeeds.map(function(f, i) {
+    var yt = isYoutubeFeed(f);
+    var label = f.name.replace(/^Googleニュース:\s*/, '');
+    var onCls = yt ? 'bg-red-600 text-white border-red-600' : 'bg-emerald-600 text-white border-emerald-600';
+    return '<button type="button" onclick="toggleNewsFeed(' + i + ')" title="' + escapeHtml(f.name) + '（クリックでON/OFF）" ' +
+      'class="px-2.5 py-1 rounded-full text-[11px] font-bold border transition ' +
+      (f.enabled ? onCls : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100') + '">' +
+      (yt ? '▶ ' : '') + escapeHtml(label) + '</button>';
+  }).join('');
+}
+
+// 管理パネル内：登録済みフィードの一覧（名前・URL・削除）
+function renderNewsFeedPanel() {
+  renderNewsFeedChips();
+  var list = document.getElementById('newsFeedList');
+  if (!list) return;
+  if (newsFeeds.length === 0) {
+    list.innerHTML = '<div class="text-xs text-slate-400 py-2">フィードがありません。上のフォームから追加してください。</div>';
+    return;
+  }
+  list.innerHTML = newsFeeds.map(function(f, i) {
+    return '<div class="flex items-center gap-2 py-1.5 border-b border-slate-100 last:border-0">' +
+      '<div class="min-w-0 flex-1">' +
+        '<div class="text-xs font-bold text-slate-800 truncate">' + escapeHtml(f.name) +
+          (f.retroOnly ? ' <span class="text-[9px] bg-amber-100 text-amber-800 px-1 rounded">レトロ語のみ</span>' : '') + '</div>' +
+        '<div class="text-[10px] text-slate-400 truncate">' + escapeHtml(f.url) + '</div>' +
+      '</div>' +
+      '<button type="button" onclick="removeNewsFeed(' + i + ')" class="text-slate-300 hover:text-red-500 font-bold text-xs px-1" title="削除">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function addNewsFeed() {
+  var type = document.getElementById('newsFeedType').value;
+  var name = document.getElementById('newsFeedName').value.trim();
+  var val = document.getElementById('newsFeedValue').value.trim();
+  var retroOnly = document.getElementById('newsFeedRetroOnly').checked;
+  if (!val) { showToast('キーワードまたはURLを入力してください', 'error'); return; }
+
+  var url;
+  var feedType = 'rss';
+  if (type === 'keyword') {
+    url = gnUrl(val);
+    if (!name) name = 'Googleニュース: ' + val;
+  } else {
+    if (!isValidHttpUrl(val)) { showToast('http(s)から始まるURLを入力してください', 'error'); return; }
+    url = val;
+    if (!name) name = val.replace(/^https?:\/\//, '').split('/')[0];
+  }
+  for (var i = 0; i < newsFeeds.length; i++) {
+    if (newsFeeds[i].url === url) { showToast('すでに登録されています', 'info'); return; }
+  }
+  newsFeeds.push({ id: 'f_' + Date.now(), name: name, url: url, enabled: true, retroOnly: retroOnly, type: feedType });
+  saveNewsFeeds();
+  document.getElementById('newsFeedName').value = '';
+  document.getElementById('newsFeedValue').value = '';
+  renderNewsFeedPanel();
+  showToast('フィードを追加しました', 'success');
+  fetchNewsFeed(true);
+}
+
+function removeNewsFeed(idx) {
+  if (!newsFeeds[idx]) return;
+  var name = newsFeeds[idx].name;
+  newsFeeds.splice(idx, 1);
+  saveNewsFeeds();
+  renderNewsFeedPanel();
+  showToast('「' + name + '」を削除しました', 'info');
+  fetchNewsFeed(true);
+}
+
+function toggleNewsFeed(idx) {
+  if (!newsFeeds[idx]) return;
+  newsFeeds[idx].enabled = !newsFeeds[idx].enabled;
+  saveNewsFeeds();
+  renderNewsFeedPanel();   // ← 追加
+  fetchNewsFeed(true);
+}
+
+function resetNewsFeeds() {
+  if (!confirm('フィード設定を初期状態に戻しますか？')) return;
+  newsFeeds = getDefaultNewsFeeds();
+  saveNewsFeeds();
+  renderNewsFeedPanel();
+  fetchNewsFeed(true);
+}
+
+// ===== 取得処理 =====
+function tryFetchText(urls, i) {
+  if (i >= urls.length) return Promise.reject(new Error('all endpoints failed'));
+  var controller = new AbortController();
+  var timer = setTimeout(function() { controller.abort(); }, 10000);
+  return fetch(urls[i], { signal: controller.signal })
+    .then(function(res) {
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.text();
+    })
+    .then(function(txt) {
+      if (!txt || (txt.indexOf('<item') === -1 && txt.indexOf('<entry') === -1)) throw new Error('not a feed');
+      return txt;
+    })
+    .catch(function() {
+      clearTimeout(timer);
+      return tryFetchText(urls, i + 1);
+    });
+}
+
+function fetchFeedXml(feedUrl) {
+  var enc = encodeURIComponent(feedUrl);
+  var tries = [];
+  if (NEWS_API_URL && NEWS_API_URL.indexOf('ここに') === -1) tries.push(NEWS_API_URL + '?url=' + enc);
+  tries.push('https://corsproxy.io/?' + enc);
+  tries.push('https://api.codetabs.com/v1/proxy?quest=' + enc);
+  tries.push('https://api.allorigins.win/raw?url=' + enc);
+  return tryFetchText(tries, 0);
+}
+
+function xmlText(el, tagNames) {
+  for (var i = 0; i < tagNames.length; i++) {
+    var n = el.getElementsByTagName(tagNames[i])[0];
+    if (n && n.textContent) return n.textContent.trim();
+  }
+  return '';
+}
+
+function faviconFor(url) {
+  try {
+    var h = new URL(url).hostname;
+    return 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(h) + '&sz=128';
+  } catch (e) { return ''; }
+}
+
+function normalizeImageUrl(u) {
+  if (!u) return '';
+  u = u.trim();
+  if (u.indexOf('//') === 0) u = 'https:' + u;
+  return u.replace(/^http:\/\//i, 'https://');
+}
+
+function parseFeedXml(xmlStr, feed) {
+  var doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+  if (doc.getElementsByTagName('parsererror').length > 0) throw new Error('XML parse error');
+  var nodes = doc.querySelectorAll('item, entry');
+  var isGoogle = feed.url.indexOf('news.google.com') !== -1;
+  var out = [];
+  for (var i = 0; i < nodes.length; i++) {
+    var it = nodes[i];
+    var title = xmlText(it, ['title']);
+    var link = xmlText(it, ['link']);
+    if (!link) { // Atom形式
+      var lk = it.getElementsByTagName('link')[0];
+      if (lk) link = lk.getAttribute('href') || '';
+    }
+    var pubDate = xmlText(it, ['pubDate', 'dc:date', 'published', 'updated']);
+    var descHtml = xmlText(it, ['description', 'summary']);
+    var contentHtml = xmlText(it, ['content:encoded', 'content']);
+    var desc = descHtml + ' ' + contentHtml;
+
+    // --- サムネイル抽出（上から順に試す） ---
+    var thumb = '';
+    var mt = it.getElementsByTagNameNS('*', 'thumbnail')[0] || it.getElementsByTagNameNS('*', 'content')[0];
+    if (mt) thumb = mt.getAttribute('url') || '';
+    if (!thumb) {
+      var encEl = it.getElementsByTagName('enclosure')[0];
+      if (encEl && (encEl.getAttribute('type') || '').indexOf('image') === 0) thumb = encEl.getAttribute('url') || '';
+    }
+    if (!thumb) thumb = extractThumbnailFromHtml(contentHtml) || extractThumbnailFromHtml(descHtml);
+    thumb = normalizeImageUrl(thumb);
+        if (!thumb) {
+      var ym = link.match(/(?:v=|youtu\.be\/)([\w-]{11})/);
+      if (ym) thumb = 'https://i.ytimg.com/vi/' + ym[1] + '/hqdefault.jpg';
     }
 
-    function closeCsvImportModal() {
-      var m = document.getElementById('csvModal');
-      if (m) m.classList.add('hidden');
+    // --- 配信元 ---
+    var srcEl = it.getElementsByTagName('source')[0];
+    var srcUrl = srcEl ? (srcEl.getAttribute('url') || '') : '';
+    var source = (srcEl && srcEl.textContent ? srcEl.textContent.trim() : '') || feed.name;
+    if (isGoogle && title.lastIndexOf(' - ') !== -1) {
+      var parts = title.split(' - ');
+      source = parts.pop();
+      title = parts.join(' - ');
+    }
+    if (!title || !link) continue;
+
+    // 画像がない記事は、配信元サイトのアイコンで代用
+    var favicon = faviconFor(srcUrl || (isGoogle ? '' : link));
+
+    if (feed.retroOnly) {
+      var hit = RETRO_KEYWORDS.some(function(k) { return (title + ' ' + desc).indexOf(k) !== -1; });
+      if (!hit) continue;
+    }
+    var isVideo = isYoutubeFeed(feed) || /youtube\.com|youtu\.be/.test(link) || /youtube/i.test(source);
+    out.push({ title: title, source: source, link: link, pubDate: pubDate, thumbnail: thumb, favicon: favicon, isVideo: isVideo });
+  }
+  return out;
+}
+
+var ogCache = {}; // link -> 画像URL（空文字は「なかった」）
+
+function enrichThumbnails() {
+  if (!NEWS_API_URL || NEWS_API_URL.indexOf('ここに') !== -1) return;
+  // 表示対象の中で、画像がなく、Googleニュース以外の記事だけ
+  var targets = allNewsList.slice(0, newsDisplayLimit).filter(function(n) {
+    return !n.thumbnail && n.link.indexOf('news.google.com') === -1 && ogCache[n.link] === undefined;
+  });
+  if (targets.length === 0) return;
+
+  var queue = targets.slice();
+  var workers = 3; // 同時3件まで
+  function next() {
+    var item = queue.shift();
+    if (!item) return;
+    fetch(NEWS_API_URL + '?mode=og&url=' + encodeURIComponent(item.link))
+      .then(function(r) { return r.text(); })
+      .then(function(t) {
+        var u = normalizeImageUrl((t || '').trim());
+        ogCache[item.link] = isValidHttpUrl(u) ? u : '';
+        if (ogCache[item.link]) item.thumbnail = ogCache[item.link];
+      })
+      .catch(function() { ogCache[item.link] = ''; })
+      .finally(function() {
+        if (queue.length === 0) { renderNewsItems(); }
+        next();
+      });
+  }
+  for (var i = 0; i < workers; i++) next();
+}
+
+function fetchNewsFeed(force) {
+  var container = document.getElementById('newsContainer');
+  var refreshIcon = document.getElementById('newsRefreshIcon');
+  var moreContainer = document.getElementById('loadMoreNewsContainer');
+  var updatedEl = document.getElementById('newsUpdatedAt');
+  if (!container || isNewsLoading) return;
+
+  if (!force && allNewsList.length > 0 && (Date.now() - newsFetchedAt) < NEWS_CLIENT_TTL_MS) {
+    renderNewsItems();
+    enrichThumbnails();
+    return;
+  }
+
+  var active = newsFeeds.filter(function(f) { return f.enabled; });
+  if (active.length === 0) {
+    allNewsList = [];
+    container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">有効なフィードがありません。「フィード管理」から追加・有効化してください。</div>';
+    if (moreContainer) moreContainer.classList.add('hidden');
+    return;
+  }
+
+  isNewsLoading = true;
+  if (refreshIcon) refreshIcon.classList.add('animate-spin');
+  container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs font-bold">ニュースを取得中...（' + active.length + ' フィード）</div>';
+  if (moreContainer) moreContainer.classList.add('hidden');
+
+  Promise.all(active.map(function(feed) {
+    return fetchFeedXml(feed.url)
+      .then(function(xml) { return { ok: true, items: parseFeedXml(xml, feed) }; })
+      .catch(function(err) { console.warn('フィード取得失敗:', feed.name, err); return { ok: false, name: feed.name, items: [] }; });
+  })).then(function(results) {
+    var merged = [];
+    newsFailedFeeds = [];
+    results.forEach(function(r) {
+      if (!r.ok) newsFailedFeeds.push(r.name);
+      merged = merged.concat(r.items);
+    });
+
+    // YouTubeがOFFのときは、動画の記事を全フィードから除外する
+    var ytOn = newsFeeds.some(function(f) { return isYoutubeFeed(f) && f.enabled; });
+    if (!ytOn) merged = merged.filter(function(n) { return !n.isVideo; });
+
+    // 重複除去（リンク or タイトル）
+    var seen = {};
+    merged = merged.filter(function(n) {
+      var key = n.link || n.title;
+      var key2 = n.title;
+      if (seen[key] || seen[key2]) return false;
+      seen[key] = true; seen[key2] = true;
+      return true;
+    });
+
+    merged.sort(function(a, b) {
+      return (new Date(b.pubDate).getTime() || 0) - (new Date(a.pubDate).getTime() || 0);
+    });
+
+    allNewsList = merged;
+    newsDisplayLimit = 10;
+    newsFetchedAt = Date.now();
+
+    if (updatedEl) {
+      var label = '更新 ' + formatNewsDate(new Date().toISOString());
+      if (newsFailedFeeds.length > 0) label += ' / 取得失敗 ' + newsFailedFeeds.length + '件';
+      updatedEl.textContent = label;
+      updatedEl.title = newsFailedFeeds.length > 0 ? ('取得できなかったフィード: ' + newsFailedFeeds.join(', ')) : '';
     }
 
-    function processSelectedCsv() {
-      var input = document.getElementById('csvFileInput');
-      if (!input || !input.files || input.files.length === 0) {
-        showToast('CSVファイルを選択してください', 'error');
+    if (merged.length === 0) {
+      container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs leading-relaxed">ニュースを取得できませんでした。<br>GASの中継設定（NEWS_API_URL）を確認するか、「最新に更新」を再度お試しください。</div>';
+    } else {
+      renderNewsItems();
+      enrichThumbnails();
+    }
+  }).finally(function() {
+    isNewsLoading = false;
+    if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+  });
+}
+
+    function renderNewsItems() {
+      var container = document.getElementById('newsContainer');
+      var moreContainer = document.getElementById('loadMoreNewsContainer');
+      if (!container) return;
+
+      var currentBatch = allNewsList.slice(0, newsDisplayLimit);
+
+      if (currentBatch.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs">ニュース記事が見つかりませんでした。</div>';
+        if (moreContainer) moreContainer.classList.add('hidden');
         return;
       }
 
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var text = e.target.result;
-        var rows = parseCsvToRows(text);
-        var added = 0;
-        var titles = [];
+      container.innerHTML = currentBatch.map(function(item) {
+        var safeLink = isValidHttpUrl(item.link) ? item.link : '#';
+        var formattedDate = formatNewsDate(item.pubDate);
+var imgSrc = item.thumbnail || item.favicon || '';
+var isFav = !item.thumbnail && !!item.favicon;
+var thumbHtml = imgSrc
+  ? '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">' +
+      '<img src="' + escapeHtml(imgSrc) + '" referrerpolicy="no-referrer" loading="lazy" ' +
+      'class="' + (isFav ? 'w-12 h-12 object-contain' : 'w-full h-full object-cover group-hover:scale-105 transition duration-300') + '" ' +
+      'onerror="this.onerror=null;this.style.display=\'none\'">' +
+    '</div>'
+  : '<div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-800 rounded-xl flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">GAME NEWS</div>';
 
-        rows.forEach(function(r) {
-          if (r && r.length > 0) {
-            r.forEach(function(cell) {
-              var t = String(cell || '').trim();
-              if (t.length > 1 && t.indexOf('タイトル') === -1 && t.indexOf('発売') === -1) {
-                titles.push(cleanTitleForMatch(t));
-              }
-            });
-          }
-        });
+        return '<a href="' + escapeHtml(safeLink) + '" target="_blank" rel="noopener noreferrer" class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex items-start gap-3 group">' +
+          thumbHtml +
+          '<div class="flex-1 min-w-0 flex flex-col justify-between h-24 sm:h-28">' +
+            '<h4 class="font-black text-slate-800 text-xs sm:text-sm group-hover:text-emerald-600 transition line-clamp-3 leading-snug">' + escapeHtml(item.title) + '</h4>' +
+            '<div class="flex items-center justify-between text-[10px] text-slate-400 mt-1 font-medium">' +
+              '<span class="truncate max-w-[120px] text-slate-500 font-bold">' + escapeHtml(item.source || '') + '</span>' +
+              '<span>' + escapeHtml(formattedDate) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</a>';
+      }).join('');
 
-        catalog.forEach(function(g) {
-          var clean = cleanTitleForMatch(g.title);
-          if (titles.indexOf(clean) !== -1) {
-            var k = makeStateKey(g.title, g.platform);
-            if (!userStates[k]) {
-              userStates[k] = { hold_status: 'owned', play_status: 'none', owned: true, rank: 'B' };
-              added++;
-            } else if (!userStates[k].owned) {
-              userStates[k].owned = true;
-              userStates[k].hold_status = 'owned';
-              added++;
-            }
-          }
-        });
-
-        saveUserStates();
-        closeCsvImportModal();
-        applyFilters();
-        showToast(added + ' 本のタイトルを「所持」にインポートしました！', 'success');
-      };
-      reader.readAsText(input.files[0], 'utf-8');
+      if (moreContainer) {
+        moreContainer.classList.toggle('hidden', newsDisplayLimit >= allNewsList.length);
+      }
     }
 
-    function exportDataBackup() {
-      var data = {
-        app: 'RETROVAULT_COLLECTOR',
-        version: '3.2',
-        exported_at: new Date().toISOString(),
-        user_states: userStates,
-        play_posts: playPosts
-      };
-      var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'retrogames_backup_' + new Date().toISOString().slice(0, 10) + '.json';
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('データバックアップを保存しました', 'info');
+    function loadMoreNews() {
+      newsDisplayLimit += 10;
+      renderNewsItems();
+      enrichThumbnails();
     }
+
+    function extractThumbnailFromHtml(html) {
+  if (!html) return '';
+  var m = html.match(/<img[^>]+(?:data-src|src)=["']((?:https?:)?\/\/[^"']+)["']/i);
+  return (m && m[1]) ? m[1] : '';
+}
 
     function updateSingleCardDom(gameId) {
       var card = document.getElementById('gameCard_' + gameId);
@@ -2841,11 +3237,10 @@
       }
       if (!game) return;
 
-      // フォーカスによるスクロール巻き戻りを防止
       if (document.activeElement && typeof document.activeElement.blur === 'function') {
         document.activeElement.blur();
       }
-      var currentY = window.pageYOffset || document.documentElement.scrollTop;
+      var currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
 
       var u = getUserState(game);
       var mergedGame = {
@@ -2878,11 +3273,7 @@
         card.outerHTML = renderSingleGridCardHtml(mergedGame);
       }
 
-      // 置換後も現在のスクロール位置を完全に維持
-      window.scrollTo(0, currentY);
-      requestAnimationFrame(function() {
-        window.scrollTo(0, currentY);
-      });
+      window.scrollTo(0, currentScrollY);
     }
 
     var currentProgressLevel = 1;
@@ -2927,7 +3318,7 @@
       if (titleEl) titleEl.textContent = '達成率・コンプリート状況';
       if (subEl) subEl.textContent = '確認したい達成率のカテゴリを選択してください';
 
-      var body = document.getElementById('progressModalBody') || document.getElementById('progressListContainer');
+      var body = document.getElementById('progressModalBody');
       if (!body) return;
 
       var totalGames = catalog.length;
@@ -3093,7 +3484,7 @@
         return b.total - a.total;
       });
 
-      var body = document.getElementById('progressModalBody') || document.getElementById('progressListContainer');
+      var body = document.getElementById('progressModalBody');
       if (!body) return;
 
       var html = '<div class="space-y-2.5">';
@@ -3314,87 +3705,6 @@
       renderCalendar();
     }
 
-    function renderCalendar() {
-      var titleEl = document.getElementById('calMonthTitle');
-      var grid = document.getElementById('calendarGridDays');
-      if (!titleEl || !grid) return;
-
-      var monthLabel = calendarYear + '年 ' + (calendarMonth + 1) + '月';
-      titleEl.textContent = monthLabel;
-
-      var firstDayIndex = new Date(calendarYear, calendarMonth, 1).getDay();
-      var daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-      var curMonth2Digit = ('0' + (calendarMonth + 1)).slice(-2);
-
-      var html = '';
-      for (var b = 0; b < firstDayIndex; b++) {
-        html += '<div class="bg-slate-50/50 min-h-[90px] p-1 border border-slate-200/50 rounded-xl"></div>';
-      }
-
-      for (var day = 1; day <= daysInMonth; day++) {
-        var day2Digit = ('0' + day).slice(-2);
-        var targetMD = curMonth2Digit + '-' + day2Digit;
-        var fullYMD = calendarYear + '-' + targetMD;
-
-        var yearMatches = [];
-        var anniversaryMatchesCount = 0;
-
-        for (var i = 0; i < catalog.length; i++) {
-          var gm = catalog[i];
-          if (gm.release_date === fullYMD) yearMatches.push(gm);
-          if (getMonthDayString(gm.release_date) === targetMD) anniversaryMatchesCount++;
-        }
-
-        var isToday = (calendarYear === new Date().getFullYear() && calendarMonth === new Date().getMonth() && day === new Date().getDate());
-
-        html += '<div onclick="filterByAnniversary(\'' + targetMD + '\')" class="bg-white min-h-[90px] p-1.5 border ' + 
-          (isToday ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200') + 
-          ' rounded-xl flex flex-col justify-between hover:bg-emerald-50/50 hover:border-emerald-400 transition cursor-pointer group">' +
-          '<div class="flex items-center justify-between">' +
-            '<span class="text-xs font-bold ' + (isToday ? 'text-emerald-700 font-black' : 'text-slate-700') + '">' + day + '</span>' +
-            (anniversaryMatchesCount > 0 ? '<span class="text-[9px] font-black bg-amber-100 text-amber-900 px-1 py-0.2 rounded">' + anniversaryMatchesCount + '本</span>' : '') +
-          '</div>' +
-          '<div class="space-y-1 mt-1 overflow-hidden">' +
-            yearMatches.slice(0, 2).map(function(g) {
-              return '<div onclick="event.stopPropagation(); openDetailModal(\'' + g.id + '\')" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-800 px-1 py-0.5 rounded truncate font-medium" title="' + escapeHtml(g.title) + '">' + escapeHtml(g.title) + '</div>';
-            }).join('') +
-            (yearMatches.length > 2 ? '<div class="text-[9px] text-slate-400 text-center font-bold">他 ' + (yearMatches.length - 2) + ' 本</div>' : '') +
-          '</div>' +
-          '<div class="text-[9px] text-slate-400 group-hover:text-emerald-600 text-right mt-1 font-semibold">一覧へ ➔</div>' +
-        '</div>';
-      }
-
-      grid.innerHTML = html;
-    }
-
-    function switchNavTab(tab) {
-      var sCat = document.getElementById('sectionCatalog');
-      var sPosts = document.getElementById('sectionPosts');
-      var sNews = document.getElementById('sectionNews');
-      var sCal = document.getElementById('sectionCalendar');
-
-      var tCat = document.getElementById('tabNavCatalog');
-      var tPosts = document.getElementById('tabNavPosts');
-      var tNews = document.getElementById('tabNavNews');
-      var tCal = document.getElementById('tabNavCalendar');
-
-      var activeClass = 'flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition';
-      var inactiveClass = 'flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-2 sm:px-3 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition';
-
-      if (sCat) sCat.classList.toggle('hidden', tab !== 'catalog');
-      if (sPosts) sPosts.classList.toggle('hidden', tab !== 'posts');
-      if (sNews) sNews.classList.toggle('hidden', tab !== 'news');
-      if (sCal) sCal.classList.toggle('hidden', tab !== 'calendar');
-
-      if (tCat) tCat.className = (tab === 'catalog') ? activeClass : inactiveClass;
-      if (tPosts) tPosts.className = (tab === 'posts') ? activeClass : inactiveClass;
-      if (tNews) tNews.className = (tab === 'news') ? activeClass : inactiveClass;
-      if (tCal) tCal.className = (tab === 'calendar') ? activeClass : inactiveClass;
-
-      if (tab === 'calendar') renderCalendar();
-      if (tab === 'news') fetchNewsFeed(false);
-    }
-
     function openCsvImportModal() {
       var m = document.getElementById('csvModal');
       if (m) m.classList.remove('hidden');
@@ -3456,7 +3766,7 @@
     function exportDataBackup() {
       var data = {
         app: 'RETROVAULT_COLLECTOR',
-        version: '3.2',
+        version: '3.1',
         exported_at: new Date().toISOString(),
         user_states: userStates,
         play_posts: playPosts
@@ -3561,6 +3871,8 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       loadSavedStates();
+      loadNewsFeeds();
+      renderNewsFeedPanel();   // ← 追加
       setViewMode(currentViewMode);
       setHoldFilter(currentHoldFilter);
       setPlayFilter(currentPlayFilter);
